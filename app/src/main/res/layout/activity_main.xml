@@ -28,7 +28,7 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/mode1"
+            android:id="@+id/search"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="@dimen/marginBottom"
@@ -44,7 +44,7 @@
             app:iconTint="@color/black" />
 
         <Button
-            android:id="@+id/mode2"
+            android:id="@+id/media"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="@dimen/marginBottom"
@@ -60,7 +60,7 @@
             app:iconTint="@color/black" />
 
         <Button
-            android:id="@+id/mode3"
+            android:id="@+id/settings"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"

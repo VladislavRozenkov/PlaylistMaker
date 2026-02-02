@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
@@ -14,13 +16,16 @@
         android:orientation="horizontal">
 
         <Button
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="0dp"
+            android:id="@+id/backButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
             android:backgroundTint="@color/white"
             android:contentDescription="Вернуться назад"
             app:icon="@drawable/arrow"
-            app:iconTint="@color/black" />
+            app:iconTint="@color/black"
+            android:padding="12dp" />
 
         <TextView
             android:layout_width="wrap_content"
