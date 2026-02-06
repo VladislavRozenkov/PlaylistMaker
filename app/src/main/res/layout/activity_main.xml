@@ -8,37 +8,32 @@
     android:orientation="vertical"
     android:background="@color/blue">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/marginStart"
-        android:layout_marginTop="14dp"
-        android:layout_marginBottom="@dimen/marginBottom"
-        android:text="@string/app_name"
-        android:textColor="@color/white"
-        android:textSize="@dimen/text_size" />
-
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="@dimen/marginTop"
-        android:layout_marginBottom="28dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@color/blue"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white"
+        app:titleTextAppearance="@style/AppToolbarTitleActivity"/>
+
 
         <Button
             android:id="@+id/search"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="@dimen/marginBottom"
+            android:layout_marginTop="@dimen/marginTop"
             android:layout_weight="1"
             android:backgroundTint="@color/white"
             android:text="@string/mode1"
             android:textAllCaps="false"
             android:textColor="@color/black"
-            android:textSize="@dimen/text_size"
+            android:textSize="@dimen/text_title"
             app:cornerRadius="@dimen/radius"
+            android:layout_marginHorizontal="@dimen/marginHorizontal"
             app:icon="@drawable/light_mode1"
             app:iconGravity="textStart"
             app:iconTint="@color/black" />
@@ -53,8 +48,9 @@
             android:text="@string/mode2"
             android:textAllCaps="false"
             android:textColor="@color/black"
-            android:textSize="@dimen/text_size"
+            android:textSize="@dimen/text_title"
             app:cornerRadius="@dimen/radius"
+            android:layout_marginHorizontal="@dimen/marginHorizontal"
             app:icon="@drawable/light_mode2"
             app:iconGravity="textStart"
             app:iconTint="@color/black" />
@@ -68,12 +64,12 @@
             android:text="@string/mode3"
             android:textAllCaps="false"
             android:textColor="@color/black"
-            android:textSize="@dimen/text_size"
+            android:textSize="@dimen/text_title"
             app:cornerRadius="@dimen/radius"
+            android:layout_marginHorizontal="@dimen/marginHorizontal"
+            android:layout_marginBottom="28dp"
             app:icon="@drawable/light_mode3"
             app:iconGravity="textStart"
             app:iconTint="@color/black" />
-
-    </LinearLayout>
 
 </LinearLayout>
