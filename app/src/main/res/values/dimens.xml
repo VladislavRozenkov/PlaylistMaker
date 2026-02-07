@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="text_title">22sp</dimen>
+    <dimen name="text_size2">16sp</dimen>
+    <dimen name="marginBottom">16dp</dimen>
+    <dimen name="radius">16dp</dimen>
+    <dimen name="marginStart">16dp</dimen>
+    <dimen name="marginTop">24dp</dimen>
+    <dimen name="marginHorizontal">16dp</dimen>
+    <dimen name="paddingStart">16dp</dimen>
+    <dimen name="paddingEnd">12dp</dimen>
+</resources>
