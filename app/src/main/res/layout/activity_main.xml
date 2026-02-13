@@ -3,18 +3,18 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
-    android:background="@color/blue"
+    android:background="?attr/colorPrimary"
     style="@style/LinearLayoutStyle" >
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/blue"
+        android:background="?attr/colorPrimary"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         app:title="@string/app_name"
-        app:titleTextColor="@color/white"
+        app:titleTextColor="?attr/colorOnPrimary"
         app:titleTextAppearance="@style/AppToolbarTitleStyle"/>
 
 

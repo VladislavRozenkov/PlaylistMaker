@@ -3,18 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
-    android:background="@color/white"
+    android:background="?attr/colorSurface"
     style="@style/LinearLayoutStyle" >
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="?attr/colorSurface"
         app:contentInsetStartWithNavigation="12dp"
         app:title="@string/mode3"
         app:navigationIcon="@drawable/arrow"
-        app:titleTextColor="@color/black"
+        app:titleTextColor="?attr/colorOnSurface"
+        app:navigationIconTint="?attr/colorOnSurface"
         app:titleTextAppearance="@style/AppToolbarTitleStyle" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
@@ -28,7 +29,7 @@
         android:textSize="@dimen/text_size2"
         android:fontFamily="@font/ys_display_regular"
         android:textFontWeight="400"
-        app:useMaterialThemeColors="false" />
+        app:useMaterialThemeColors="true" />
 
     <TextView
         android:text="@string/share"
