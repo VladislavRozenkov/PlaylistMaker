@@ -32,16 +32,19 @@
         app:useMaterialThemeColors="true" />
 
     <TextView
+        android:id="@+id/share"
         android:text="@string/share"
         app:drawableEndCompat="@drawable/share"
         style="@style/TextViewStyle" />
 
     <TextView
+        android:id="@+id/support"
         android:text="@string/support"
         app:drawableEndCompat="@drawable/support"
         style="@style/TextViewStyle" />
 
     <TextView
+        android:id="@+id/agreement"
         android:layout_marginBottom="476dp"
         android:text="@string/User_agreement"
         app:drawableEndCompat="@drawable/agreement"
