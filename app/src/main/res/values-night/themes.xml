@@ -22,4 +22,11 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
+    <style name="Theme.PlaylistMaker.Search" parent="Theme.PlaylistMaker">
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorControlNormal">@color/black</item>
+        <item name="colorSurfaceVariant">@color/white</item>
+    </style>
+
 </resources>

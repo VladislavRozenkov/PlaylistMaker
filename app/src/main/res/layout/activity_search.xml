@@ -1,10 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".SearchActivity">
+    android:id="@+id/search"
+    android:background="?attr/colorSurface"
+    style="@style/LinearLayoutStyle">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:contentInsetStartWithNavigation="12dp"
+        app:title="@string/search"
+        app:navigationIcon="@drawable/arrow"
+        app:titleTextColor="?attr/colorOnSurface"
+        app:navigationIconTint="?attr/colorOnSurface"
+        app:titleTextAppearance="@style/AppToolbarTitleStyle" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="8dp">
+
+        <EditText
+            android:id="@+id/searchEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edittext"
+            android:drawableStart="@drawable/light_mode1"
+            android:drawableTint="?attr/colorControlNormal"
+            android:drawablePadding="8dp"
+            android:paddingLeft="13dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:paddingEnd="48dp"
+            android:hint="@string/search"
+            android:textColorHint="?attr/colorControlNormal"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:fontFamily="@font/ys_display_regular"
+            android:textFontWeight="400"/>
+
+        <ImageView
+            android:id="@+id/clearIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="end|center_vertical"
+            android:src="@drawable/cross"
+            android:visibility="gone"
+            android:scaleType="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:contentDescription="@string/clear_search"
+            app:tint="?attr/colorControlNormal" />
+    </FrameLayout>
+
+</LinearLayout>
