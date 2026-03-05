@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker
 
-import android.content.Context
+
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -15,10 +15,22 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.MaterialToolbar
 
 class SearchActivity : AppCompatActivity() {
+
+    companion object {
+        const val DEFAULT_SEARCH_QUERY = ""
+        const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+    }
+
+    private var searchQuery: String = DEFAULT_SEARCH_QUERY
+
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
         setContentView(R.layout.activity_search)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.search)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -53,6 +65,7 @@ class SearchActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {
+                searchQuery = s?.toString() ?: DEFAULT_SEARCH_QUERY
                 clearIcon.visibility = clearButtonVisibility(s)
             }
 
@@ -64,6 +77,17 @@ class SearchActivity : AppCompatActivity() {
             searchEditText.text.clear()
             hideKeyboard()
         }
+
+        if (savedInstanceState != null) {
+            val restoredText = savedInstanceState.getString(SEARCH_QUERY_KEY, DEFAULT_SEARCH_QUERY)
+            searchEditText.setText(restoredText)
+            searchEditText.setSelection(restoredText.length)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("SEARCH_QUERY_KEY", searchQuery)
     }
 
     private fun clearButtonVisibility(s: CharSequence?): Int {
@@ -75,7 +99,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun hideKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         currentFocus?.windowToken?.let { token ->
             imm.hideSoftInputFromWindow(token, 0)
         }
