@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/settings"
-    android:background="?attr/colorSurface"
-    style="@style/LinearLayoutStyle" >
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
@@ -12,42 +13,60 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
         app:contentInsetStartWithNavigation="12dp"
-        app:title="@string/mode3"
+        app:title="@string/settings_title"
         app:navigationIcon="@drawable/arrow"
         app:titleTextColor="?attr/colorOnSurface"
         app:navigationIconTint="?attr/colorOnSurface"
-        app:titleTextAppearance="@style/AppToolbarTitleStyle" />
+        app:titleTextAppearance="@style/AppToolbarTitleStyle"
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/theme_switch"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:paddingTop="21dp"
+        android:paddingBottom="21dp"
         android:layout_marginTop="24dp"
         android:paddingStart="@dimen/paddingStart"
         android:paddingEnd="@dimen/paddingEnd"
-        android:text="@string/Dark_theme"
+        android:text="@string/dark_theme"
         android:textSize="@dimen/text_size2"
         android:fontFamily="@font/ys_display_regular"
         android:textFontWeight="400"
-        app:useMaterialThemeColors="true" />
+        app:useMaterialThemeColors="true"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
 
     <TextView
         android:id="@+id/share"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="21dp"
+        android:paddingBottom="21dp"
         android:text="@string/share"
         app:drawableEndCompat="@drawable/share"
-        style="@style/TextViewStyle" />
+        app:layout_constraintTop_toBottomOf="@+id/theme_switch"
+        style="@style/TextViewStyle"/>
 
     <TextView
         android:id="@+id/support"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="21dp"
+        android:paddingBottom="21dp"
         android:text="@string/support"
         app:drawableEndCompat="@drawable/support"
-        style="@style/TextViewStyle" />
+        app:layout_constraintTop_toBottomOf="@+id/share"
+        style="@style/TextViewStyle"/>
 
     <TextView
         android:id="@+id/agreement"
-        android:layout_marginBottom="476dp"
-        android:text="@string/User_agreement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="21dp"
+        android:paddingBottom="21dp"
+        android:text="@string/user_agreement"
         app:drawableEndCompat="@drawable/agreement"
-        style="@style/TextViewStyle" />
+        app:layout_constraintTop_toBottomOf="@+id/support"
+        style="@style/TextViewStyle"/>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

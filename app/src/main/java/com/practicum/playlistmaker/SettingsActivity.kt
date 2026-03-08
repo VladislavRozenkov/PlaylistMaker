@@ -46,16 +46,21 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun shareApp() {
+
         val shareText = getString(R.string.shareText)
+
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
+        val shareVia = getString(R.string.share_via)
+
         if (shareIntent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(shareIntent, "Поделиться через"))
+            startActivity(Intent.createChooser(shareIntent, shareVia))
         } else {
             Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
         }
+
     }
 
     private fun sendEmailToSupport() {
@@ -64,17 +69,19 @@ class SettingsActivity : AppCompatActivity() {
         val subject = getString(R.string.subject)
         val body = getString(R.string.body)
 
-        val encodedSubject = Uri.encode(subject)
-        val encodedBody = Uri.encode(body)
-        val uri = Uri.parse("mailto:$recipientEmail?subject=$encodedSubject&body=$encodedBody")
+        val emailIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
 
-        val intentSupport = Intent(Intent.ACTION_SENDTO, uri)
-
-        if (intentSupport.resolveActivity(packageManager) != null) {
-            startActivity(intentSupport)
+        if (emailIntent.resolveActivity(packageManager) != null) {
+            startActivity(Intent.createChooser(emailIntent, getString(R.string.email_chooser_title)))
         } else {
             Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
         }
+
     }
 
 }

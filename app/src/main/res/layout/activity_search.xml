@@ -41,6 +41,7 @@
             android:textSize="16sp"
             android:maxLines="1"
             android:inputType="text"
+            android:singleLine="true"
             android:fontFamily="@font/ys_display_regular"
             android:textFontWeight="400"/>
 

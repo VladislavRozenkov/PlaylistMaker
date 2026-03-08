@@ -1,18 +1,17 @@
 package com.practicum.playlistmaker
 
 
+
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
-import android.widget.ImageView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.appbar.MaterialToolbar
+import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 
 class SearchActivity : AppCompatActivity() {
 
@@ -20,8 +19,7 @@ class SearchActivity : AppCompatActivity() {
         const val DEFAULT_SEARCH_QUERY = ""
         const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
     }
-
-    private var searchQuery: String = DEFAULT_SEARCH_QUERY
+    private lateinit var binding: ActivitySearchBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -29,78 +27,54 @@ class SearchActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
-        setContentView(R.layout.activity_search)
+        binding = ActivitySearchBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.search)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        val searchEditText = findViewById<EditText>(R.id.searchEditText)
-        val clearIcon = findViewById<ImageView>(R.id.clearIcon)
-
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             finish()
         }
 
         val simpleTextWatcher = object : TextWatcher {
-            override fun beforeTextChanged(
-                s: CharSequence?,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            }
-
-            override fun onTextChanged(
-                s: CharSequence?,
-                start: Int,
-                before: Int,
-                count: Int
-            ) {
-
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                searchQuery = s?.toString() ?: DEFAULT_SEARCH_QUERY
-                clearIcon.visibility = clearButtonVisibility(s)
+                binding.clearIcon.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
             }
 
         }
 
-        searchEditText.addTextChangedListener(simpleTextWatcher)
+        binding.searchEditText.addTextChangedListener(simpleTextWatcher)
 
-        clearIcon.setOnClickListener {
-            searchEditText.text.clear()
+        binding.clearIcon.setOnClickListener {
+            binding.searchEditText.text.clear()
             hideKeyboard()
         }
 
-        if (savedInstanceState != null) {
-            val restoredText = savedInstanceState.getString(SEARCH_QUERY_KEY, DEFAULT_SEARCH_QUERY)
-            searchEditText.setText(restoredText)
-            searchEditText.setSelection(restoredText.length)
-        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putString("SEARCH_QUERY_KEY", searchQuery)
+        outState.putString(SEARCH_QUERY_KEY, binding.searchEditText.text.toString())
     }
 
-    private fun clearButtonVisibility(s: CharSequence?): Int {
-        return if (s.isNullOrEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val restoredText = savedInstanceState.getString(SEARCH_QUERY_KEY, DEFAULT_SEARCH_QUERY)
+        binding.searchEditText.setText(restoredText)
+        binding.searchEditText.setSelection(restoredText.length)
     }
 
     private fun hideKeyboard() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        currentFocus?.windowToken?.let { token ->
+        binding.searchEditText.windowToken?.let { token ->
             imm.hideSoftInputFromWindow(token, 0)
         }
     }
