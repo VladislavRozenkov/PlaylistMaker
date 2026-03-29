@@ -3,73 +3,41 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/blue">
+    android:background="?attr/colorPrimary"
+    style="@style/LinearLayoutStyle" >
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:background="@color/blue"
         app:title="@string/app_name"
-        app:titleTextColor="@color/white"
-        app:titleTextAppearance="@style/AppToolbarTitleActivity"/>
+        app:titleTextColor="?attr/colorOnPrimary"
+        app:titleTextAppearance="@style/AppToolbarTitleStyle"/>
 
 
-        <Button
-            android:id="@+id/search"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/marginBottom"
-            android:layout_marginTop="@dimen/marginTop"
-            android:layout_weight="1"
-            android:backgroundTint="@color/white"
-            android:text="@string/mode1"
-            android:textAllCaps="false"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_title"
-            app:cornerRadius="@dimen/radius"
-            android:layout_marginHorizontal="@dimen/marginHorizontal"
-            app:icon="@drawable/light_mode1"
-            app:iconGravity="textStart"
-            app:iconTint="@color/black" />
+    <Button
+        android:id="@+id/search"
+        android:layout_marginTop="@dimen/marginTop"
+        android:layout_marginBottom="@dimen/marginBottom"
+        android:text="@string/mode1"
+        app:icon="@drawable/light_mode1"
+        style="@style/ButtonStyleActivity" />
 
-        <Button
-            android:id="@+id/media"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="@dimen/marginBottom"
-            android:layout_weight="1"
-            android:backgroundTint="@color/white"
-            android:text="@string/mode2"
-            android:textAllCaps="false"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_title"
-            app:cornerRadius="@dimen/radius"
-            android:layout_marginHorizontal="@dimen/marginHorizontal"
-            app:icon="@drawable/light_mode2"
-            app:iconGravity="textStart"
-            app:iconTint="@color/black" />
+    <Button
+        android:id="@+id/media"
+        android:layout_marginBottom="@dimen/marginBottom"
+        android:text="@string/mode2"
+        app:icon="@drawable/light_mode2"
+        style="@style/ButtonStyleActivity" />
 
-        <Button
-            android:id="@+id/settings"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:backgroundTint="@color/white"
-            android:text="@string/mode3"
-            android:textAllCaps="false"
-            android:textColor="@color/black"
-            android:textSize="@dimen/text_title"
-            app:cornerRadius="@dimen/radius"
-            android:layout_marginHorizontal="@dimen/marginHorizontal"
-            android:layout_marginBottom="28dp"
-            app:icon="@drawable/light_mode3"
-            app:iconGravity="textStart"
-            app:iconTint="@color/black" />
+    <Button
+        android:id="@+id/settings"
+        android:text="@string/settings_title"
+        android:layout_marginBottom="28dp"
+        app:icon="@drawable/light_mode3"
+        style="@style/ButtonStyleActivity" />
 
 </LinearLayout>
