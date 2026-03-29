@@ -21,7 +21,6 @@
 
     <style name="Theme.PlaylistMaker.Search" parent="Theme.PlaylistMaker">
         <item name="colorSurfaceVariant">@color/light_gray</item>
-        <item name="searchSecondaryTextColor">@color/gray</item>
     </style>
 
 </resources>
