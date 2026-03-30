@@ -27,6 +27,7 @@
         <item name="colorOnSurface">@color/white</item>
         <item name="colorControlNormal">@color/black</item>
         <item name="colorSurfaceVariant">@color/white</item>
+        <item name="searchSecondaryTextColor">@color/white</item>
     </style>
 
 </resources>
