@@ -26,6 +26,8 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var trackAdapter: TrackAdapter
 
+    private var lastSearchQuery = ""
+
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://itunes.apple.com/")
         .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
@@ -74,14 +76,16 @@ class SearchActivity : AppCompatActivity() {
         binding.clearIcon.setOnClickListener {
             binding.searchEditText.text.clear()
             hideKeyboard()
+
+            trackAdapter.updateTracks(emptyList())
+            binding.recyclerView.visibility = View.GONE
+            binding.stateView.visibility = View.GONE
         }
 
         binding.stateButton.setOnClickListener {
-            val query = binding.searchEditText.text.toString().trim()
-
-            if (query.isNotEmpty()) {
+            if (lastSearchQuery.isNotEmpty()) {
                 hideKeyboard()
-                searchTracks(query)
+                searchTracks(lastSearchQuery)
             }
         }
 
@@ -124,6 +128,8 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchTracks(query: String) {
+
+        lastSearchQuery = query
 
         showLoading()
 
