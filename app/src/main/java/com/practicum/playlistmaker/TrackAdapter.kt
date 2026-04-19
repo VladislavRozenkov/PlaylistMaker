@@ -8,7 +8,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.databinding.ItemTrackBinding
 
-class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
+class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = ItemTrackBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -26,7 +26,7 @@ class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<Track
         fun bind(track: Track) {
             binding.trackName.text = track.trackName
             binding.artistName.text = track.artistName
-            binding.tvCount.text = track.trackTime
+            binding.tvTrackTime.text = track.trackTime
 
             Glide.with(binding.ivArt.context)
                 .load(track.artworkUrl100)
@@ -35,5 +35,11 @@ class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<Track
                 .transform(CenterCrop(), RoundedCorners(2))
                 .into(binding.ivArt)
         }
+    }
+
+    fun updateTracks(newTracks: List<Track>) {
+        tracks.clear()
+        tracks.addAll(newTracks)
+        notifyDataSetChanged()
     }
 }
