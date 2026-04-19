@@ -63,7 +63,7 @@
         app:tint="?attr/searchSecondaryTextColor" />
 
     <TextView
-        android:id="@+id/tvCount"
+        android:id="@+id/tvTrackTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="@font/ys_display_regular"

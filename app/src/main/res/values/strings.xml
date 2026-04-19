@@ -17,4 +17,8 @@
     <string name="clear_search">Очистить поисковый запрос</string>
     <string name="share_via">Поделиться через</string>
     <string name="email_chooser_title">Отправить письмо через</string>
+    <string name="nothing">Ничего не нашлось</string>
+    <string name="communication_problems">Проблемы со связью</string>
+    <string name="communication_problems2">Загрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="refresh">Обновить</string>
 </resources>

@@ -7,13 +7,15 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.LinearLayout
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
+import retrofit2.Call
+import retrofit2.Response
+import retrofit2.Retrofit
 
 class SearchActivity : AppCompatActivity() {
 
@@ -23,6 +25,15 @@ class SearchActivity : AppCompatActivity() {
     }
     private lateinit var binding: ActivitySearchBinding
     private lateinit var trackAdapter: TrackAdapter
+
+    private var lastSearchQuery = ""
+
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://itunes.apple.com/")
+        .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
+        .build()
+
+    private val api = retrofit.create(ItunesApi::class.java)
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -34,17 +45,9 @@ class SearchActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        val mockTracks = arrayListOf(
-            Track("Smells Like Teen Spirit", "Nirvana", "5:01", "https://is5-ssl.mzstatic.com/image/thumb/Music115/v4/7b/58/c2/7b58c21a-2b51-2bb2-e59a-9bb9b96ad8c3/00602567924166.rgb.jpg/100x100bb.jpg"),
-            Track("Billie Jean", "Michael Jackson", "4:35", "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/3d/9d/38/3d9d3811-71f0-3a0e-1ada-3004e56ff852/827969428726.jpg/100x100bb.jpg"),
-            Track("Stayin' Alive", "Bee Gees", "4:10", "https://is4-ssl.mzstatic.com/image/thumb/Music115/v4/1f/80/1f/1f801fc1-8c0f-ea3e-d3e5-387c6619619e/16UMGIM86640.rgb.jpg/100x100bb.jpg"),
-            Track("Whole Lotta Love", "Led Zeppelin", "5:33", "https://is2-ssl.mzstatic.com/image/thumb/Music62/v4/7e/17/e3/7e17e33f-2efa-2a36-e916-7f808576cf6b/mzm.fyigqcbs.jpg/100x100bb.jpg"),
-            Track("Sweet Child O'Mine", "Guns N' Roses", "5:03", "https://is5-ssl.mzstatic.com/image/thumb/Music125/v4/a0/4d/c4/a04dc484-03cc-02aa-fa82-5334fcb4bc16/18UMGIM24878.rgb.jpg/100x100bb.jpg")
-        )
-
         val recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
-        trackAdapter = TrackAdapter(mockTracks)
+        trackAdapter = TrackAdapter(ArrayList())
         recyclerView.adapter = trackAdapter
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -73,6 +76,34 @@ class SearchActivity : AppCompatActivity() {
         binding.clearIcon.setOnClickListener {
             binding.searchEditText.text.clear()
             hideKeyboard()
+
+            trackAdapter.updateTracks(emptyList())
+            binding.recyclerView.visibility = View.GONE
+            binding.stateView.visibility = View.GONE
+        }
+
+        binding.stateButton.setOnClickListener {
+            if (lastSearchQuery.isNotEmpty()) {
+                hideKeyboard()
+                searchTracks(lastSearchQuery)
+            }
+        }
+
+        binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+                val query = binding.searchEditText.text.toString().trim()
+
+                if (query.isNotEmpty()) {
+                    hideKeyboard()
+                    searchTracks(query)
+                }
+
+                true
+
+            } else {
+
+                false
+            }
         }
 
     }
@@ -94,5 +125,82 @@ class SearchActivity : AppCompatActivity() {
         binding.searchEditText.windowToken?.let { token ->
             imm.hideSoftInputFromWindow(token, 0)
         }
+    }
+
+    private fun searchTracks(query: String) {
+
+        lastSearchQuery = query
+
+        showLoading()
+
+        api.search(query).enqueue(object : retrofit2.Callback<ItunesResponse> {
+
+            override fun onResponse(
+                call: Call<ItunesResponse>,
+                response: Response<ItunesResponse>) {
+
+                if (response.isSuccessful) {
+                    val tracks = response.body()?.results ?: emptyList()
+
+                    val mappedTracks = tracks.map {
+                        Track(
+                            it.trackName,
+                            it.artistName,
+                            formatTime(it.trackTimeMillis),
+                            it.artworkUrl100
+                        )
+                    }
+
+                    if (mappedTracks.isEmpty()) {
+                        showEmpty()
+                    } else {
+                        trackAdapter.updateTracks(mappedTracks)
+                        showContent()
+                    }
+
+                } else {
+                    showError()
+                }
+
+            }
+
+            override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+                showError()
+            }
+        })
+    }
+
+    private fun formatTime(millis: Long): String {
+        return java.text.SimpleDateFormat("mm:ss", java.util.Locale.getDefault()).format(millis)
+    }
+
+    private fun showLoading() {
+        binding.recyclerView.visibility = View.GONE
+        binding.stateView.visibility = View.GONE
+    }
+
+    private fun showContent() {
+        binding.recyclerView.visibility = View.VISIBLE
+        binding.stateView.visibility = View.GONE
+    }
+
+    private fun showEmpty() {
+        binding.recyclerView.visibility = View.GONE
+        binding.stateView.visibility = View.VISIBLE
+
+        binding.stateImage.setImageResource(R.drawable.sad_smiley_face)
+        binding.stateTitle.text = getString(R.string.nothing)
+        binding.stateMessage.text = ""
+        binding.stateButton.visibility = View.GONE
+    }
+
+    private fun showError() {
+        binding.recyclerView.visibility = View.GONE
+        binding.stateView.visibility = View.VISIBLE
+
+        binding.stateImage.setImageResource(R.drawable.there_is_no_internet_connection)
+        binding.stateTitle.text = getString(R.string.communication_problems)
+        binding.stateMessage.text = getString(R.string.communication_problems2)
+        binding.stateButton.visibility = View.VISIBLE
     }
 }
