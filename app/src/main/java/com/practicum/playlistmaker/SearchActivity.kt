@@ -24,7 +24,9 @@ class SearchActivity : AppCompatActivity() {
         const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
     }
     private lateinit var binding: ActivitySearchBinding
+    private lateinit var searchHistory: SearchHistory
     private lateinit var trackAdapter: TrackAdapter
+    private lateinit var historyAdapter: TrackAdapter
 
     private var lastSearchQuery = ""
 
@@ -45,10 +47,24 @@ class SearchActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        binding.searchEditText.post {
+            binding.searchEditText.requestFocus()
+        }
+
+        val prefs = getSharedPreferences("search_prefs", MODE_PRIVATE)
+        searchHistory = SearchHistory(prefs)
+        val historyList = searchHistory.getHistory()
+
         val recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
         trackAdapter = TrackAdapter(ArrayList())
         recyclerView.adapter = trackAdapter
+
+        val historyRecycler = binding.historyRecycler
+        historyRecycler.layoutManager = LinearLayoutManager(this)
+        historyAdapter = TrackAdapter(ArrayList())
+        historyRecycler.adapter = historyAdapter
+        historyAdapter.updateTracks(historyList)
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -66,9 +82,43 @@ class SearchActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
             override fun afterTextChanged(s: Editable?) {
-                binding.clearIcon.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
+                val text = s?.toString().orEmpty()
+
+                binding.clearIcon.visibility =
+                    if (text.isEmpty()) View.GONE else View.VISIBLE
+
+                if (binding.searchEditText.hasFocus()
+                    && text.isEmpty()
+                    && searchHistory.getHistory().isNotEmpty()
+                    ) {
+                    binding.historyContainer.visibility = View.VISIBLE
+                } else {
+                    binding.historyContainer.visibility = View.GONE
+                }
             }
 
+        }
+
+        binding.clearHistoryBtn.setOnClickListener {
+            searchHistory.clear()
+            historyAdapter.updateTracks(emptyList())
+            binding.historyContainer.visibility = View.GONE
+        }
+
+        trackAdapter.onClick = { track ->
+            searchHistory.addTrack(track)
+
+            val updatedHistory = searchHistory.getHistory()
+            historyAdapter.updateTracks(updatedHistory)
+        }
+
+        binding.searchEditText.setOnFocusChangeListener {_, hasFocus ->
+            if (hasFocus && binding.searchEditText.text.isNullOrEmpty()
+                && searchHistory.getHistory().isNotEmpty()) {
+                binding.historyContainer.visibility = View.VISIBLE
+            } else {
+                binding.historyContainer.visibility = View.GONE
+            }
         }
 
         binding.searchEditText.addTextChangedListener(simpleTextWatcher)
@@ -80,6 +130,10 @@ class SearchActivity : AppCompatActivity() {
             trackAdapter.updateTracks(emptyList())
             binding.recyclerView.visibility = View.GONE
             binding.stateView.visibility = View.GONE
+
+            if (searchHistory.getHistory().isNotEmpty()) {
+                binding.historyContainer.visibility = View.VISIBLE
+            }
         }
 
         binding.stateButton.setOnClickListener {
@@ -129,6 +183,8 @@ class SearchActivity : AppCompatActivity() {
 
     private fun searchTracks(query: String) {
 
+        binding.historyContainer.visibility = View.GONE
+
         lastSearchQuery = query
 
         showLoading()
@@ -144,6 +200,7 @@ class SearchActivity : AppCompatActivity() {
 
                     val mappedTracks = tracks.map {
                         Track(
+                            it.trackId,
                             it.trackName,
                             it.artistName,
                             formatTime(it.trackTimeMillis),

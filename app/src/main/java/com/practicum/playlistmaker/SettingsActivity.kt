@@ -54,6 +54,9 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.themeSwitch.isChecked =
+            (applicationContext as App).darkTheme
+
         binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
             (applicationContext as App).switchTheme(isChecked)
         }
