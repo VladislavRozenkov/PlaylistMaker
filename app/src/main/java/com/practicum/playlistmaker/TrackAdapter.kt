@@ -10,13 +10,21 @@ import com.practicum.playlistmaker.databinding.ItemTrackBinding
 
 class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
+    var onClick: ((Track) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
         val binding = ItemTrackBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return TrackViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
-        holder.bind(tracks[position])
+        val track = tracks[position]
+
+        holder.bind(track)
+
+        holder.itemView.setOnClickListener {
+            onClick?.invoke(track)
+        }
     }
 
     override fun getItemCount() = tracks.size
