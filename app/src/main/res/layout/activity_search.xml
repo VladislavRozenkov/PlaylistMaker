@@ -161,7 +161,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/historyRecycler"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginTop="8dp"/>
 
             <com.google.android.material.button.MaterialButton

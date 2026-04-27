@@ -6,11 +6,6 @@ import com.google.gson.reflect.TypeToken
 
 class SearchHistory(private val prefs: SharedPreferences) {
 
-    companion object {
-        private const val KEY_HISTORY = "search_history"
-        private const val MAX_SIZE = 10
-    }
-
     private val gson = Gson()
 
     fun getHistory(): MutableList<Track> {
@@ -39,5 +34,10 @@ class SearchHistory(private val prefs: SharedPreferences) {
         prefs.edit()
             .putString(KEY_HISTORY, json)
             .apply()
+    }
+
+    companion object {
+        private const val KEY_HISTORY = "search_history"
+        private const val MAX_SIZE = 10
     }
 }
