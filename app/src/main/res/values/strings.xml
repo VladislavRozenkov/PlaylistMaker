@@ -23,4 +23,7 @@
     <string name="refresh">Обновить</string>
     <string name="you_were_looking_for">Вы искали</string>
     <string name="clear_the_history">Очистить историю</string>
+    <string name="play">Play track</string>
+    <string name="like">Like track</string>
+    <string name="add">Add to playlist</string>
 </resources>
