@@ -2,6 +2,7 @@ package com.practicum.playlistmaker
 
 
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -110,6 +111,17 @@ class SearchActivity : AppCompatActivity() {
 
             val updatedHistory = searchHistory.getHistory()
             historyAdapter.updateTracks(updatedHistory)
+
+            startActivity(MediaActivity.createIntent(this, track))
+        }
+
+        historyAdapter.onClick = { track ->
+            searchHistory.addTrack(track)
+
+            val updatedHistory = searchHistory.getHistory()
+            historyAdapter.updateTracks(updatedHistory)
+
+            startActivity(MediaActivity.createIntent(this, track))
         }
 
         binding.searchEditText.setOnFocusChangeListener {_, hasFocus ->
@@ -204,7 +216,11 @@ class SearchActivity : AppCompatActivity() {
                             it.trackName,
                             it.artistName,
                             formatTime(it.trackTimeMillis),
-                            it.artworkUrl100
+                            it.artworkUrl100,
+                            it.collectionName,
+                            it.releaseDate,
+                            it.primaryGenreName,
+                            it.country
                         )
                     }
 
