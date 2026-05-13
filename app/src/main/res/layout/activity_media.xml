@@ -229,6 +229,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="9dp"
             android:paddingBottom="8dp"
+            android:layout_marginBottom="20dp"
             android:text="@string/country"
             app:layout_constraintTop_toBottomOf="@id/genre_title"
             app:layout_constraintStart_toEndOf="@id/left_guideline"

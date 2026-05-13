@@ -2,6 +2,7 @@ package com.practicum.playlistmaker
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -10,7 +11,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.databinding.ActivityMediaBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MediaActivity : AppCompatActivity() {
 
@@ -38,36 +43,37 @@ class MediaActivity : AppCompatActivity() {
     }
 
     private fun renderTrack() {
-        val trackName = intent.getStringExtra(EXTRA_TRACK_NAME).orEmpty()
-        val artistName = intent.getStringExtra(EXTRA_ARTIST_NAME).orEmpty()
-        val trackTime = intent.getStringExtra(EXTRA_TRACK_TIME).orEmpty()
-        val artworkUrl100 = intent.getStringExtra(EXTRA_ARTWORK_URL_100).orEmpty()
-        val collectionName = intent.getStringExtra(EXTRA_COLLECTION_NAME).orEmpty()
-        val releaseDate = intent.getStringExtra(EXTRA_RELEASE_DATE).orEmpty()
-        val primaryGenreName = intent.getStringExtra(EXTRA_PRIMARY_GENRE_NAME).orEmpty()
-        val country = intent.getStringExtra(EXTRA_COUNTRY).orEmpty()
 
-        binding.trackName.text = trackName
-        binding.executor.text = artistName
-        binding.time.text = "00:00"
-        binding.durationValue.text = trackTime
+        val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_TRACK, Track::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(EXTRA_TRACK)
+        } ?: return
+
+        binding.trackName.text = track.trackName
+        binding.executor.text = track.artistName
+        binding.time.text = formatTime(0L)
+        binding.durationValue.text = track.trackTime
         setOptionalField(
             binding.albumTitle,
             binding.albumValue,
-            collectionName
+            track.collectionName.orEmpty()
         )
         setOptionalField(
             binding.yearTitle,
             binding.yearValue,
-            releaseDate.take(4)
+            track.releaseDate?.take(4).orEmpty()
         )
-        binding.genreValue.text = primaryGenreName
-        binding.countryValue.text = country
+        binding.genreValue.text = track.primaryGenreName.orEmpty()
+        binding.countryValue.text = track.country.orEmpty()
 
         Glide.with(this)
-            .load(getCoverArtwork(artworkUrl100))
+            .load(getCoverArtwork(track.artworkUrl100))
             .placeholder(R.drawable.snake)
             .error(R.drawable.snake)
+            .transform(CenterCrop(),
+                RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius)))
             .into(binding.imageCover)
     }
 
@@ -87,26 +93,15 @@ class MediaActivity : AppCompatActivity() {
         }
     }
 
+    private fun formatTime(millis: Long): String {
+        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
+    }
     companion object {
-        private const val EXTRA_TRACK_NAME = "trackName"
-        private const val EXTRA_ARTIST_NAME = "artistName"
-        private const val EXTRA_TRACK_TIME = "trackTime"
-        private const val EXTRA_ARTWORK_URL_100 = "artworkUrl100"
-        private const val EXTRA_COLLECTION_NAME = "collectionName"
-        private const val EXTRA_RELEASE_DATE = "releaseDate"
-        private const val EXTRA_PRIMARY_GENRE_NAME = "primaryGenreName"
-        private const val EXTRA_COUNTRY = "country"
+        private const val EXTRA_TRACK = "track"
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, MediaActivity::class.java).apply {
-                putExtra(EXTRA_TRACK_NAME, track.trackName)
-                putExtra(EXTRA_ARTIST_NAME, track.artistName)
-                putExtra(EXTRA_TRACK_TIME, track.trackTime)
-                putExtra(EXTRA_ARTWORK_URL_100, track.artworkUrl100)
-                putExtra(EXTRA_COLLECTION_NAME, track.collectionName)
-                putExtra(EXTRA_RELEASE_DATE, track.releaseDate)
-                putExtra(EXTRA_PRIMARY_GENRE_NAME, track.primaryGenreName)
-                putExtra(EXTRA_COUNTRY, track.country)
+                putExtra(EXTRA_TRACK, track)
             }
         }
     }
