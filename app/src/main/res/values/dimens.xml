@@ -9,4 +9,5 @@
     <dimen name="marginHorizontal">16dp</dimen>
     <dimen name="paddingStart">16dp</dimen>
     <dimen name="paddingEnd">12dp</dimen>
+    <dimen name="cover_corner_radius">8dp</dimen>
 </resources>
