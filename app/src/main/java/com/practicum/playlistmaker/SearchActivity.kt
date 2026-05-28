@@ -2,8 +2,9 @@ package com.practicum.playlistmaker
 
 
 
-import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -23,13 +24,22 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         const val DEFAULT_SEARCH_QUERY = ""
         const val SEARCH_QUERY_KEY = "SEARCH_QUERY"
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
     private lateinit var binding: ActivitySearchBinding
     private lateinit var searchHistory: SearchHistory
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
-
     private var lastSearchQuery = ""
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable {
+        val query = binding.searchEditText.text.toString().trim()
+        if (query.isNotEmpty() && query != lastSearchQuery) {
+            searchTracks(query)
+        }
+    }
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://itunes.apple.com/")
@@ -96,6 +106,17 @@ class SearchActivity : AppCompatActivity() {
                 } else {
                     binding.historyContainer.visibility = View.GONE
                 }
+
+                if (text.trim().isEmpty()) {
+                    handler.removeCallbacks(searchRunnable)
+                    lastSearchQuery = ""
+                    trackAdapter.updateTracks(emptyList())
+                    binding.progressBar.visibility = View.GONE
+                    binding.recyclerView.visibility = View.GONE
+                    binding.stateView.visibility = View.GONE
+                } else {
+                    searchDebounce()
+                }
             }
 
         }
@@ -107,21 +128,27 @@ class SearchActivity : AppCompatActivity() {
         }
 
         trackAdapter.onClick = { track ->
-            searchHistory.addTrack(track)
+            if (clickDebounce()) {
+                searchHistory.addTrack(track)
 
-            val updatedHistory = searchHistory.getHistory()
-            historyAdapter.updateTracks(updatedHistory)
+                val updatedHistory = searchHistory.getHistory()
+                historyAdapter.updateTracks(updatedHistory)
 
-            startActivity(MediaActivity.createIntent(this, track))
+                startActivity(MediaActivity.createIntent(this, track))
+            }
+
         }
 
         historyAdapter.onClick = { track ->
-            searchHistory.addTrack(track)
+            if (clickDebounce()) {
+                searchHistory.addTrack(track)
 
-            val updatedHistory = searchHistory.getHistory()
-            historyAdapter.updateTracks(updatedHistory)
+                val updatedHistory = searchHistory.getHistory()
+                historyAdapter.updateTracks(updatedHistory)
 
-            startActivity(MediaActivity.createIntent(this, track))
+                startActivity(MediaActivity.createIntent(this, track))
+            }
+
         }
 
         binding.searchEditText.setOnFocusChangeListener {_, hasFocus ->
@@ -140,6 +167,7 @@ class SearchActivity : AppCompatActivity() {
             hideKeyboard()
 
             trackAdapter.updateTracks(emptyList())
+
             binding.recyclerView.visibility = View.GONE
             binding.stateView.visibility = View.GONE
 
@@ -248,19 +276,22 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showLoading() {
+        binding.progressBar.visibility = View.VISIBLE
         binding.recyclerView.visibility = View.GONE
         binding.stateView.visibility = View.GONE
+        binding.historyContainer.visibility = View.GONE
     }
 
     private fun showContent() {
+        binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.VISIBLE
         binding.stateView.visibility = View.GONE
     }
 
     private fun showEmpty() {
+        binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.GONE
         binding.stateView.visibility = View.VISIBLE
-
         binding.stateImage.setImageResource(R.drawable.sad_smiley_face)
         binding.stateTitle.text = getString(R.string.nothing)
         binding.stateMessage.text = ""
@@ -268,12 +299,33 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun showError() {
+        binding.progressBar.visibility = View.GONE
         binding.recyclerView.visibility = View.GONE
         binding.stateView.visibility = View.VISIBLE
-
         binding.stateImage.setImageResource(R.drawable.there_is_no_internet_connection)
         binding.stateTitle.text = getString(R.string.communication_problems)
         binding.stateMessage.text = getString(R.string.communication_problems2)
         binding.stateButton.visibility = View.VISIBLE
+    }
+
+    private fun searchDebounce() {
+        handler.removeCallbacks(searchRunnable)
+        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+    }
+
+    private fun clickDebounce(): Boolean {
+        val current = isClickAllowed
+
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+
+        return current
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(searchRunnable)
     }
 }
