@@ -36,7 +36,7 @@ class SearchActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val searchRunnable = Runnable {
         val query = binding.searchEditText.text.toString().trim()
-        if (query.isNotEmpty() && query != lastSearchQuery) {
+        if (query.isNotEmpty()) {
             searchTracks(query)
         }
     }
