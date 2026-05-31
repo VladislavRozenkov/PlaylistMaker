@@ -16,10 +16,25 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.databinding.ActivityMediaBinding
 import java.text.SimpleDateFormat
 import java.util.Locale
+import android.media.MediaPlayer
+import android.os.Handler
+import android.os.Looper
 
 class MediaActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMediaBinding
+
+    private var mediaPlayer = MediaPlayer()
+    private var playerState = STATE_DEFAULT
+    private val handler = Handler(Looper.getMainLooper())
+    private val updateTimerRunnable = object : Runnable {
+        override fun run() {
+            if (playerState == STATE_PLAYING) {
+                binding.time.text = formatTime(mediaPlayer.currentPosition.toLong())
+                handler.postDelayed(this, DELAY)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +65,16 @@ class MediaActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(EXTRA_TRACK)
         } ?: return
+
+        val previewUrl = track.previewUrl
+
+        if (!previewUrl.isNullOrBlank()) {
+            preparePlayer(previewUrl)
+        }
+
+        binding.play.setOnClickListener {
+            playbackControl()
+        }
 
         binding.trackName.text = track.trackName
         binding.executor.text = track.artistName
@@ -96,8 +121,67 @@ class MediaActivity : AppCompatActivity() {
     private fun formatTime(millis: Long): String {
         return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
     }
+
+    private fun preparePlayer(url: String) {
+        mediaPlayer.setDataSource(url)
+
+        mediaPlayer.setOnPreparedListener {
+            playerState = STATE_PREPARED
+        }
+
+        mediaPlayer.setOnCompletionListener {
+            binding.play.setImageResource(R.drawable.button_play)
+            binding.time.text = formatTime(0L)
+            playerState = STATE_PREPARED
+            handler.removeCallbacks(updateTimerRunnable)
+        }
+
+        mediaPlayer.prepareAsync()
+    }
+
+    private fun playbackControl() {
+        when (playerState) {
+            STATE_PLAYING -> pausePlayer()
+            STATE_PREPARED, STATE_PAUSED -> startPlayer()
+        }
+    }
+
+    private fun startPlayer() {
+        mediaPlayer.start()
+        binding.play.setImageResource(R.drawable.button_play_pause)
+        playerState = STATE_PLAYING
+        handler.post(updateTimerRunnable)
+    }
+
+    private fun pausePlayer() {
+        mediaPlayer.pause()
+        binding.play.setImageResource(R.drawable.button_play)
+        playerState = STATE_PAUSED
+        handler.removeCallbacks(updateTimerRunnable)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (playerState == STATE_PLAYING) {
+            pausePlayer()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(updateTimerRunnable)
+        mediaPlayer.release()
+    }
+
     companion object {
         private const val EXTRA_TRACK = "track"
+
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+
+        private const val DELAY = 300L
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, MediaActivity::class.java).apply {
