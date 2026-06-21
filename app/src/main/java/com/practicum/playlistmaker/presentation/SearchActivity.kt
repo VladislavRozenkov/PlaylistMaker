@@ -1,6 +1,4 @@
-package com.practicum.playlistmaker
-
-
+package com.practicum.playlistmaker.presentation
 
 import android.os.Bundle
 import android.os.Handler
@@ -8,16 +6,27 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.practicum.playlistmaker.data.network.ItunesApi
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.SearchHistory
+import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
+import com.practicum.playlistmaker.di.Creator
+import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
 import retrofit2.Call
+import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
 
@@ -41,12 +50,9 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://itunes.apple.com/")
-        .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(ItunesApi::class.java)
+    private val searchTracksInteractor: SearchTracksInteractor by lazy {
+        Creator.provideSearchTracksInteractor()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -184,7 +190,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val query = binding.searchEditText.text.toString().trim()
 
                 if (query.isNotEmpty()) {
@@ -229,51 +235,20 @@ class SearchActivity : AppCompatActivity() {
 
         showLoading()
 
-        api.search(query).enqueue(object : retrofit2.Callback<ItunesResponse> {
-
-            override fun onResponse(
-                call: Call<ItunesResponse>,
-                response: Response<ItunesResponse>) {
-
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.results ?: emptyList()
-
-                    val mappedTracks = tracks.map {
-                        Track(
-                            it.trackId,
-                            it.trackName,
-                            it.artistName,
-                            formatTime(it.trackTimeMillis),
-                            it.artworkUrl100,
-                            it.collectionName,
-                            it.releaseDate,
-                            it.primaryGenreName,
-                            it.country,
-                            it.previewUrl
-                        )
-                    }
-
-                    if (mappedTracks.isEmpty()) {
-                        showEmpty()
-                    } else {
-                        trackAdapter.updateTracks(mappedTracks)
-                        showContent()
-                    }
-
+        searchTracksInteractor.execute(
+            query,
+            { tracks ->
+                if (tracks.isEmpty()) {
+                    showEmpty()
                 } else {
-                    showError()
+                    trackAdapter.updateTracks(tracks)
+                    showContent()
                 }
-
-            }
-
-            override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+            },
+            {
                 showError()
             }
-        })
-    }
-
-    private fun formatTime(millis: Long): String {
-        return java.text.SimpleDateFormat("mm:ss", java.util.Locale.getDefault()).format(millis)
+        )
     }
 
     private fun showLoading() {
