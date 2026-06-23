@@ -1,10 +1,20 @@
 package com.practicum.playlistmaker.di
 
+import android.content.Context
 import com.practicum.playlistmaker.data.mapper.TrackMapper
 import com.practicum.playlistmaker.data.network.ItunesApi
+import com.practicum.playlistmaker.data.repository.SearchHistoryRepositoryImpl
 import com.practicum.playlistmaker.data.repository.TracksRepositoryImpl
+import com.practicum.playlistmaker.data.storage.SearchHistoryStorage
+import com.practicum.playlistmaker.domain.interactor.AddTrackToHistoryInteractor
+import com.practicum.playlistmaker.domain.interactor.AddTrackToHistoryInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.ClearSearchHistoryInteractor
+import com.practicum.playlistmaker.domain.interactor.ClearSearchHistoryInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.GetSearchHistoryInteractor
+import com.practicum.playlistmaker.domain.interactor.GetSearchHistoryInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
 import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractorImpl
+import com.practicum.playlistmaker.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.repository.TracksRepository
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -30,4 +40,30 @@ object Creator {
     fun provideSearchTracksInteractor(): SearchTracksInteractor {
         return SearchTracksInteractorImpl(tracksRepository)
     }
+
+    private fun provideSearchHistoryRepository(context: Context): SearchHistoryRepository {
+        return SearchHistoryRepositoryImpl(
+            SearchHistoryStorage(context),
+            trackMapper
+        )
+    }
+
+    fun provideGetSearchHistoryInteractor(context: Context): GetSearchHistoryInteractor {
+        return GetSearchHistoryInteractorImpl(
+            provideSearchHistoryRepository(context)
+        )
+    }
+
+    fun provideAddTrackToHistoryInteractor(context: Context): AddTrackToHistoryInteractor {
+        return AddTrackToHistoryInteractorImpl(
+            provideSearchHistoryRepository(context)
+        )
+    }
+
+    fun provideClearSearchHistoryInteractor(context: Context): ClearSearchHistoryInteractor {
+        return ClearSearchHistoryInteractorImpl(
+            provideSearchHistoryRepository(context)
+        )
+    }
+
 }

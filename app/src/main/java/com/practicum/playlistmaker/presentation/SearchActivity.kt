@@ -13,20 +13,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.practicum.playlistmaker.data.network.ItunesApi
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.SearchHistory
-import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.di.Creator
 import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class SearchActivity : AppCompatActivity() {
 
@@ -36,8 +26,19 @@ class SearchActivity : AppCompatActivity() {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
+
+    private val getSearchHistoryInteractor by lazy {
+        Creator.provideGetSearchHistoryInteractor(applicationContext)
+    }
+
+    private val addTrackToHistoryInteractor by lazy {
+        Creator.provideAddTrackToHistoryInteractor(applicationContext)
+    }
+
+    private val clearSearchHistoryInteractor by lazy {
+        Creator.provideClearSearchHistoryInteractor(applicationContext)
+    }
     private lateinit var binding: ActivitySearchBinding
-    private lateinit var searchHistory: SearchHistory
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
     private var lastSearchQuery = ""
@@ -68,9 +69,7 @@ class SearchActivity : AppCompatActivity() {
             binding.searchEditText.requestFocus()
         }
 
-        val prefs = getSharedPreferences("search_prefs", MODE_PRIVATE)
-        searchHistory = SearchHistory(prefs)
-        val historyList = searchHistory.getHistory()
+        val historyList = getSearchHistoryInteractor.execute()
 
         val recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -106,7 +105,7 @@ class SearchActivity : AppCompatActivity() {
 
                 if (binding.searchEditText.hasFocus()
                     && text.isEmpty()
-                    && searchHistory.getHistory().isNotEmpty()
+                    && getSearchHistoryInteractor.execute().isNotEmpty()
                     ) {
                     binding.historyContainer.visibility = View.VISIBLE
                 } else {
@@ -128,16 +127,16 @@ class SearchActivity : AppCompatActivity() {
         }
 
         binding.clearHistoryBtn.setOnClickListener {
-            searchHistory.clear()
+            clearSearchHistoryInteractor.execute()
             historyAdapter.updateTracks(emptyList())
             binding.historyContainer.visibility = View.GONE
         }
 
         trackAdapter.onClick = { track ->
             if (clickDebounce()) {
-                searchHistory.addTrack(track)
+                addTrackToHistoryInteractor.execute(track)
 
-                val updatedHistory = searchHistory.getHistory()
+                val updatedHistory = getSearchHistoryInteractor.execute()
                 historyAdapter.updateTracks(updatedHistory)
 
                 startActivity(MediaActivity.createIntent(this, track))
@@ -147,9 +146,9 @@ class SearchActivity : AppCompatActivity() {
 
         historyAdapter.onClick = { track ->
             if (clickDebounce()) {
-                searchHistory.addTrack(track)
+                addTrackToHistoryInteractor.execute(track)
 
-                val updatedHistory = searchHistory.getHistory()
+                val updatedHistory = getSearchHistoryInteractor.execute()
                 historyAdapter.updateTracks(updatedHistory)
 
                 startActivity(MediaActivity.createIntent(this, track))
@@ -159,7 +158,7 @@ class SearchActivity : AppCompatActivity() {
 
         binding.searchEditText.setOnFocusChangeListener {_, hasFocus ->
             if (hasFocus && binding.searchEditText.text.isNullOrEmpty()
-                && searchHistory.getHistory().isNotEmpty()) {
+                && getSearchHistoryInteractor.execute().isNotEmpty()) {
                 binding.historyContainer.visibility = View.VISIBLE
             } else {
                 binding.historyContainer.visibility = View.GONE
@@ -177,7 +176,7 @@ class SearchActivity : AppCompatActivity() {
             binding.recyclerView.visibility = View.GONE
             binding.stateView.visibility = View.GONE
 
-            if (searchHistory.getHistory().isNotEmpty()) {
+            if (getSearchHistoryInteractor.execute().isNotEmpty()) {
                 binding.historyContainer.visibility = View.VISIBLE
             }
         }
