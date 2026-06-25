@@ -24,26 +24,13 @@ class SearchHistoryStorage(context: Context) {
         }
     }
 
-    fun addTrack(track: TrackStorageDto) {
-        val history = getHistory().toMutableList()
-
-        history.removeAll { it.trackId == track.trackId }
-        history.add(0, track)
-
-        if (history.size > MAX_HISTORY_SIZE) {
-            history.removeAt(history.lastIndex)
-        }
-
-        saveHistory(history)
-    }
-
     fun clearHistory() {
         sharedPreferences.edit()
             .remove(SEARCH_HISTORY_KEY)
             .apply()
     }
 
-    private fun saveHistory(history: List<TrackStorageDto>) {
+    fun saveHistory(history: List<TrackStorageDto>) {
         val json = gson.toJson(history)
 
         sharedPreferences.edit()
@@ -54,6 +41,5 @@ class SearchHistoryStorage(context: Context) {
     companion object {
         private const val SEARCH_HISTORY_PREFERENCES = "search_history_preferences"
         private const val SEARCH_HISTORY_KEY = "search_history_key"
-        private const val MAX_HISTORY_SIZE = 10
     }
 }
