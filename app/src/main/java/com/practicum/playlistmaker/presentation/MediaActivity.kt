@@ -19,6 +19,8 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.databinding.ActivityMediaBinding
+import com.practicum.playlistmaker.presentation.mapper.TrackParcelableMapper
+import com.practicum.playlistmaker.presentation.models.TrackParcelable
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -61,12 +63,14 @@ class MediaActivity : AppCompatActivity() {
 
     private fun renderTrack() {
 
-        val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_TRACK, Track::class.java)
+        val trackParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_TRACK, TrackParcelable::class.java)
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(EXTRA_TRACK)
         } ?: return
+
+        val track = TrackParcelableMapper.mapToTrack(trackParcelable)
 
         val previewUrl = track.previewUrl
 
@@ -189,7 +193,7 @@ class MediaActivity : AppCompatActivity() {
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, MediaActivity::class.java).apply {
-                putExtra(EXTRA_TRACK, track)
+                putExtra(EXTRA_TRACK, TrackParcelableMapper.mapToParcelable(track))
             }
         }
     }

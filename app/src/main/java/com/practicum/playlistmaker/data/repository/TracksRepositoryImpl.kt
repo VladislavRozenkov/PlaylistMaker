@@ -22,8 +22,8 @@ class TracksRepositoryImpl(
         api.search(query).enqueue(object  : Callback<ItunesResponseDto> {
 
             override fun onResponse(
-                call: Call<ItunesResponseDto?>,
-                response: Response<ItunesResponseDto?>
+                call: Call<ItunesResponseDto>,
+                response: Response<ItunesResponseDto>
             ) {
                 if (response.isSuccessful) {
                     val tracks = response.body()?.results.orEmpty()
