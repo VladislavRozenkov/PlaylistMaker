@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,7 +6,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.databinding.ItemTrackBinding
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
@@ -34,7 +38,7 @@ class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapte
         fun bind(track: Track) {
             binding.trackName.text = track.trackName
             binding.artistName.text = track.artistName
-            binding.tvTrackTime.text = track.trackTime
+            binding.tvTrackTime.text = formatTime(track.trackTimeMillis)
 
             Glide.with(binding.ivArt.context)
                 .load(track.artworkUrl100)
@@ -43,6 +47,11 @@ class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapte
                 .transform(CenterCrop(), RoundedCorners(2))
                 .into(binding.ivArt)
         }
+
+        private fun formatTime(millis: Long): String {
+            return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
+        }
+
     }
 
     fun updateTracks(newTracks: List<Track>) {

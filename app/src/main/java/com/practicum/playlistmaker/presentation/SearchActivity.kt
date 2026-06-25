@@ -1,6 +1,4 @@
-package com.practicum.playlistmaker
-
-
+package com.practicum.playlistmaker.presentation
 
 import android.os.Bundle
 import android.os.Handler
@@ -8,16 +6,17 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
-import retrofit2.Call
-import retrofit2.Response
-import retrofit2.Retrofit
+import com.practicum.playlistmaker.di.Creator
+import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
 
 class SearchActivity : AppCompatActivity() {
 
@@ -27,8 +26,19 @@ class SearchActivity : AppCompatActivity() {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
+
+    private val getSearchHistoryInteractor by lazy {
+        Creator.provideGetSearchHistoryInteractor(applicationContext)
+    }
+
+    private val addTrackToHistoryInteractor by lazy {
+        Creator.provideAddTrackToHistoryInteractor(applicationContext)
+    }
+
+    private val clearSearchHistoryInteractor by lazy {
+        Creator.provideClearSearchHistoryInteractor(applicationContext)
+    }
     private lateinit var binding: ActivitySearchBinding
-    private lateinit var searchHistory: SearchHistory
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
     private var lastSearchQuery = ""
@@ -41,12 +51,9 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    private val retrofit = Retrofit.Builder()
-        .baseUrl("https://itunes.apple.com/")
-        .addConverterFactory(retrofit2.converter.gson.GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(ItunesApi::class.java)
+    private val searchTracksInteractor: SearchTracksInteractor by lazy {
+        Creator.provideSearchTracksInteractor()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -62,9 +69,7 @@ class SearchActivity : AppCompatActivity() {
             binding.searchEditText.requestFocus()
         }
 
-        val prefs = getSharedPreferences("search_prefs", MODE_PRIVATE)
-        searchHistory = SearchHistory(prefs)
-        val historyList = searchHistory.getHistory()
+        val historyList = getSearchHistoryInteractor.execute()
 
         val recyclerView = binding.recyclerView
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -100,7 +105,7 @@ class SearchActivity : AppCompatActivity() {
 
                 if (binding.searchEditText.hasFocus()
                     && text.isEmpty()
-                    && searchHistory.getHistory().isNotEmpty()
+                    && getSearchHistoryInteractor.execute().isNotEmpty()
                     ) {
                     binding.historyContainer.visibility = View.VISIBLE
                 } else {
@@ -122,16 +127,16 @@ class SearchActivity : AppCompatActivity() {
         }
 
         binding.clearHistoryBtn.setOnClickListener {
-            searchHistory.clear()
+            clearSearchHistoryInteractor.execute()
             historyAdapter.updateTracks(emptyList())
             binding.historyContainer.visibility = View.GONE
         }
 
         trackAdapter.onClick = { track ->
             if (clickDebounce()) {
-                searchHistory.addTrack(track)
+                addTrackToHistoryInteractor.execute(track)
 
-                val updatedHistory = searchHistory.getHistory()
+                val updatedHistory = getSearchHistoryInteractor.execute()
                 historyAdapter.updateTracks(updatedHistory)
 
                 startActivity(MediaActivity.createIntent(this, track))
@@ -141,9 +146,9 @@ class SearchActivity : AppCompatActivity() {
 
         historyAdapter.onClick = { track ->
             if (clickDebounce()) {
-                searchHistory.addTrack(track)
+                addTrackToHistoryInteractor.execute(track)
 
-                val updatedHistory = searchHistory.getHistory()
+                val updatedHistory = getSearchHistoryInteractor.execute()
                 historyAdapter.updateTracks(updatedHistory)
 
                 startActivity(MediaActivity.createIntent(this, track))
@@ -153,7 +158,7 @@ class SearchActivity : AppCompatActivity() {
 
         binding.searchEditText.setOnFocusChangeListener {_, hasFocus ->
             if (hasFocus && binding.searchEditText.text.isNullOrEmpty()
-                && searchHistory.getHistory().isNotEmpty()) {
+                && getSearchHistoryInteractor.execute().isNotEmpty()) {
                 binding.historyContainer.visibility = View.VISIBLE
             } else {
                 binding.historyContainer.visibility = View.GONE
@@ -171,7 +176,7 @@ class SearchActivity : AppCompatActivity() {
             binding.recyclerView.visibility = View.GONE
             binding.stateView.visibility = View.GONE
 
-            if (searchHistory.getHistory().isNotEmpty()) {
+            if (getSearchHistoryInteractor.execute().isNotEmpty()) {
                 binding.historyContainer.visibility = View.VISIBLE
             }
         }
@@ -184,7 +189,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         binding.searchEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 val query = binding.searchEditText.text.toString().trim()
 
                 if (query.isNotEmpty()) {
@@ -229,51 +234,20 @@ class SearchActivity : AppCompatActivity() {
 
         showLoading()
 
-        api.search(query).enqueue(object : retrofit2.Callback<ItunesResponse> {
-
-            override fun onResponse(
-                call: Call<ItunesResponse>,
-                response: Response<ItunesResponse>) {
-
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.results ?: emptyList()
-
-                    val mappedTracks = tracks.map {
-                        Track(
-                            it.trackId,
-                            it.trackName,
-                            it.artistName,
-                            formatTime(it.trackTimeMillis),
-                            it.artworkUrl100,
-                            it.collectionName,
-                            it.releaseDate,
-                            it.primaryGenreName,
-                            it.country,
-                            it.previewUrl
-                        )
-                    }
-
-                    if (mappedTracks.isEmpty()) {
-                        showEmpty()
-                    } else {
-                        trackAdapter.updateTracks(mappedTracks)
-                        showContent()
-                    }
-
+        searchTracksInteractor.execute(
+            query,
+            { tracks ->
+                if (tracks.isEmpty()) {
+                    showEmpty()
                 } else {
-                    showError()
+                    trackAdapter.updateTracks(tracks)
+                    showContent()
                 }
-
-            }
-
-            override fun onFailure(call: Call<ItunesResponse>, t: Throwable) {
+            },
+            {
                 showError()
             }
-        })
-    }
-
-    private fun formatTime(millis: Long): String {
-        return java.text.SimpleDateFormat("mm:ss", java.util.Locale.getDefault()).format(millis)
+        )
     }
 
     private fun showLoading() {

@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation
 
 import android.content.Intent
 import android.net.Uri
@@ -10,10 +10,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.MaterialToolbar
+import com.practicum.playlistmaker.App
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
+import com.practicum.playlistmaker.di.Creator
+import com.practicum.playlistmaker.domain.models.ThemeSettings
 
 class SettingsActivity : AppCompatActivity() {
 
+    private val getThemeSettingsInteractor by lazy {
+        Creator.provideGetThemeSettingsInteractor(applicationContext)
+    }
+
+    private val updateThemeSettingsInteractor by lazy {
+        Creator.provideUpdateThemeSettingsInteractor(applicationContext)
+    }
     private lateinit var binding: ActivitySettingsBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,9 +66,12 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         binding.themeSwitch.isChecked =
-            (applicationContext as App).darkTheme
+            getThemeSettingsInteractor.execute().darkTheme
 
         binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
+            updateThemeSettingsInteractor.execute(
+                ThemeSettings(isChecked)
+            )
             (applicationContext as App).switchTheme(isChecked)
         }
 

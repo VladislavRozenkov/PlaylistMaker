@@ -1,9 +1,12 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
@@ -13,12 +16,13 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.databinding.ActivityMediaBinding
+import com.practicum.playlistmaker.presentation.mapper.TrackParcelableMapper
+import com.practicum.playlistmaker.presentation.models.TrackParcelable
 import java.text.SimpleDateFormat
 import java.util.Locale
-import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
 
 class MediaActivity : AppCompatActivity() {
 
@@ -59,12 +63,14 @@ class MediaActivity : AppCompatActivity() {
 
     private fun renderTrack() {
 
-        val track = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_TRACK, Track::class.java)
+        val trackParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_TRACK, TrackParcelable::class.java)
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(EXTRA_TRACK)
         } ?: return
+
+        val track = TrackParcelableMapper.mapToTrack(trackParcelable)
 
         val previewUrl = track.previewUrl
 
@@ -79,7 +85,7 @@ class MediaActivity : AppCompatActivity() {
         binding.trackName.text = track.trackName
         binding.executor.text = track.artistName
         binding.time.text = formatTime(0L)
-        binding.durationValue.text = track.trackTime
+        binding.durationValue.text = formatTime(track.trackTimeMillis)
         setOptionalField(
             binding.albumTitle,
             binding.albumValue,
@@ -97,8 +103,10 @@ class MediaActivity : AppCompatActivity() {
             .load(getCoverArtwork(track.artworkUrl100))
             .placeholder(R.drawable.snake)
             .error(R.drawable.snake)
-            .transform(CenterCrop(),
-                RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius)))
+            .transform(
+                CenterCrop(),
+                RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius))
+            )
             .into(binding.imageCover)
     }
 
@@ -185,7 +193,7 @@ class MediaActivity : AppCompatActivity() {
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, MediaActivity::class.java).apply {
-                putExtra(EXTRA_TRACK, track)
+                putExtra(EXTRA_TRACK, TrackParcelableMapper.mapToParcelable(track))
             }
         }
     }
