@@ -16,8 +16,12 @@ class SearchHistoryRepositoryImpl(
         }
     }
 
-    override fun addTrack(track: Track) {
-        storage.addTrack(mapper.mapTrackToStorageDto(track))
+    override fun saveHistory(history: List<Track>) {
+        val historyDto = history.map { track ->
+            mapper.mapTrackToStorageDto(track)
+        }
+
+        storage.saveHistory(historyDto)
     }
 
     override fun clearHistory() {
