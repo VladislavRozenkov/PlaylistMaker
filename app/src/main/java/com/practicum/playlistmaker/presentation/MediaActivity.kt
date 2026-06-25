@@ -85,7 +85,7 @@ class MediaActivity : AppCompatActivity() {
         binding.trackName.text = track.trackName
         binding.executor.text = track.artistName
         binding.time.text = formatTime(0L)
-        binding.durationValue.text = track.trackTime
+        binding.durationValue.text = formatTime(track.trackTimeMillis)
         setOptionalField(
             binding.albumTitle,
             binding.albumValue,

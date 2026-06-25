@@ -13,7 +13,7 @@ class TrackMapper {
             track.trackId,
             track.trackName,
             track.artistName,
-            track.trackTime,
+            track.trackTimeMillis,
             track.artworkUrl100,
             track.collectionName,
             track.releaseDate,
@@ -28,7 +28,7 @@ class TrackMapper {
             dto.trackId,
             dto.trackName,
             dto.artistName,
-            dto.trackTime,
+            dto.trackTimeMillis,
             dto.artworkUrl100,
             dto.collectionName,
             dto.releaseDate,
@@ -43,7 +43,7 @@ class TrackMapper {
             dto.trackId,
             dto.trackName,
             dto.artistName,
-            formatTime(dto.trackTimeMillis),
+            dto.trackTimeMillis,
             dto.artworkUrl100,
             dto.collectionName,
             dto.releaseDate,
@@ -51,10 +51,6 @@ class TrackMapper {
             dto.country,
             dto.previewUrl
         )
-    }
-
-    private fun formatTime(millis: Long): String {
-        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
     }
 
 }
