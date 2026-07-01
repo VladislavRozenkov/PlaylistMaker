@@ -23,6 +23,8 @@ import com.practicum.playlistmaker.domain.interactor.UpdateThemeSettingsInteract
 import com.practicum.playlistmaker.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.repository.SettingsRepository
 import com.practicum.playlistmaker.domain.repository.TracksRepository
+import com.practicum.playlistmaker.presentation.SearchViewModelFactory
+import com.practicum.playlistmaker.presentation.SettingsViewModelFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -88,6 +90,22 @@ object Creator {
     fun provideUpdateThemeSettingsInteractor(context: Context): UpdateThemeSettingsInteractor {
         return UpdateThemeSettingsInteractorImpl(
             provideSettingsRepository(context)
+        )
+    }
+
+    fun provideSearchViewModelFactory(context: Context): SearchViewModelFactory {
+        return SearchViewModelFactory(
+            provideSearchTracksInteractor(),
+            provideGetSearchHistoryInteractor(context),
+            provideAddTrackToHistoryInteractor(context),
+            provideClearSearchHistoryInteractor(context)
+        )
+    }
+
+    fun provideSettingsViewModelFactory(context: Context): SettingsViewModelFactory {
+        return SettingsViewModelFactory(
+            provideGetThemeSettingsInteractor(context),
+            provideUpdateThemeSettingsInteractor(context)
         )
     }
 
