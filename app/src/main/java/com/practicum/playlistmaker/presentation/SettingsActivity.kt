@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.presentation
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -106,9 +107,9 @@ class SettingsActivity : AppCompatActivity() {
 
         val shareVia = getString(R.string.share_via)
 
-        if (shareIntent.resolveActivity(packageManager) != null) {
+        try {
             startActivity(Intent.createChooser(shareIntent, shareVia))
-        } else {
+        } catch (exception: ActivityNotFoundException) {
             Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
         }
     }
@@ -118,22 +119,27 @@ class SettingsActivity : AppCompatActivity() {
         val subject = getString(R.string.subject)
         val body = getString(R.string.body)
 
-        val emailIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "message/rfc822"
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, body)
-        }
+        val emailUri = Uri.parse("mailto:$recipientEmail")
+            .buildUpon()
+            .appendQueryParameter("subject", subject)
+            .appendQueryParameter("body", body)
+            .build()
 
-        if (emailIntent.resolveActivity(packageManager) != null) {
+        val emailIntent = Intent(Intent.ACTION_SENDTO, emailUri)
+
+        try {
             startActivity(
                 Intent.createChooser(
                     emailIntent,
                     getString(R.string.email_chooser_title)
                 )
             )
-        } else {
-            Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
+        } catch (exception: ActivityNotFoundException) {
+            Toast.makeText(
+                this,
+                R.string.toastText,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 

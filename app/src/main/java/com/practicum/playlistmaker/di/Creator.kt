@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.di
 import android.content.Context
 import com.practicum.playlistmaker.data.mapper.TrackMapper
 import com.practicum.playlistmaker.data.network.ItunesApi
+import com.practicum.playlistmaker.data.network.ItunesApiClient
 import com.practicum.playlistmaker.data.repository.SearchHistoryRepositoryImpl
 import com.practicum.playlistmaker.data.repository.SettingsRepositoryImpl
 import com.practicum.playlistmaker.data.repository.TracksRepositoryImpl
@@ -31,19 +32,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object Creator {
 
-    private const val ITUNES_BASE_URL = "https://itunes.apple.com/"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(ITUNES_BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(ItunesApi::class.java)
-
     private val trackMapper = TrackMapper()
 
     private val tracksRepository: TracksRepository = TracksRepositoryImpl(
-        api,
+        ItunesApiClient.api,
         trackMapper
     )
 
