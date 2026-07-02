@@ -30,6 +30,8 @@ class MediaActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMediaBinding
     private lateinit var viewModel: MediaViewModel
 
+    private var currentArtworkUrl: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -38,7 +40,12 @@ class MediaActivity : AppCompatActivity() {
         binding = ActivityMediaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val track = getTrackFromIntent() ?: return
+        val track = getTrackFromIntent()
+
+        if (track == null) {
+            finish()
+            return
+        }
 
         viewModel = ViewModelProvider(
             this,
@@ -122,15 +129,19 @@ class MediaActivity : AppCompatActivity() {
             state.year
         )
 
-        Glide.with(this)
-            .load(state.artworkUrl)
-            .placeholder(R.drawable.snake)
-            .error(R.drawable.snake)
-            .transform(
-                CenterCrop(),
-                RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius))
-            )
-            .into(binding.imageCover)
+        if (currentArtworkUrl != state.artworkUrl) {
+            currentArtworkUrl = state.artworkUrl
+
+            Glide.with(this)
+                .load(state.artworkUrl)
+                .placeholder(R.drawable.snake)
+                .error(R.drawable.snake)
+                .transform(
+                    CenterCrop(),
+                    RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius))
+                )
+                .into(binding.imageCover)
+        }
     }
 
     private fun setOptionalField(

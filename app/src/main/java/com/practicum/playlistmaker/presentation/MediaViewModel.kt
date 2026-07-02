@@ -96,7 +96,7 @@ class MediaViewModel(
                 mediaPlayer.seekTo(0)
                 currentProgress = 0L
 
-                renderState(progress = currentProgress)
+                renderState(currentProgress)
             }
 
             mediaPlayer.prepareAsync()

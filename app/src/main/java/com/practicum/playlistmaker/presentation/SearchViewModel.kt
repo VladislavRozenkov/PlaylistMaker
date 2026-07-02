@@ -19,10 +19,10 @@ class SearchViewModel(
 ) : ViewModel() {
 
     private val handler = Handler(Looper.getMainLooper())
-
     private var lastSearchQuery = ""
     private var currentText = ""
     private var isClickAllowed = true
+    private var isScreenInitialized = false
 
     private val screenStateMutable = MutableLiveData<SearchScreenState>()
     val screenState: LiveData<SearchScreenState> = screenStateMutable
@@ -37,7 +37,10 @@ class SearchViewModel(
     }
 
     fun onScreenOpened() {
-        showHistoryOrEmptyInput()
+        if (!isScreenInitialized) {
+            isScreenInitialized = true
+            showHistoryOrEmptyInput()
+        }
     }
 
     fun onSearchTextChanged(text: String, hasFocus: Boolean) {
