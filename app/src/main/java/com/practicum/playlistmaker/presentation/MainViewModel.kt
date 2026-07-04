@@ -10,19 +10,19 @@ class MainViewModel(
     private val getSearchHistoryInteractor: GetSearchHistoryInteractor
 ) : ViewModel() {
 
-    private val openLastTrackMutable = MutableLiveData<Event<Track>>()
-    val openLastTrack: LiveData<Event<Track>> = openLastTrackMutable
+    private val _openLastTrack = MutableLiveData<Event<Track>>()
+    val openLastTrack: LiveData<Event<Track>> = _openLastTrack
 
-    private val showNoLastTrackMessageMutable = MutableLiveData<Event<Unit>>()
-    val showNoLastTrackMessage: LiveData<Event<Unit>> = showNoLastTrackMessageMutable
+    private val _showNoLastTrackMessage = MutableLiveData<Event<Unit>>()
+    val showNoLastTrackMessage: LiveData<Event<Unit>> = _showNoLastTrackMessage
 
     fun onMediaClicked() {
         val lastTrack = getSearchHistoryInteractor.execute().firstOrNull()
 
         if (lastTrack != null) {
-            openLastTrackMutable.value = Event(lastTrack)
+            _openLastTrack.value = Event(lastTrack)
         } else {
-            showNoLastTrackMessageMutable.value = Event(Unit)
+            _showNoLastTrackMessage.value = Event(Unit)
         }
     }
 }

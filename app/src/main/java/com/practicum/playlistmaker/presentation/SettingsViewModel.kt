@@ -12,16 +12,16 @@ class SettingsViewModel(
     private val updateThemeSettingsInteractor: UpdateThemeSettingsInteractor
 ) : ViewModel() {
 
-    private val screenStateMutable = MutableLiveData<SettingsScreenState>()
-    val screenState: LiveData<SettingsScreenState> = screenStateMutable
+    private val _screenState = MutableLiveData<SettingsScreenState>()
+    val screenState: LiveData<SettingsScreenState> = _screenState
 
-    private val themeChangedMutable = MutableLiveData<Event<Boolean>>()
-    val themeChanged: LiveData<Event<Boolean>> = themeChangedMutable
+    private val _themeChanged = MutableLiveData<Event<Boolean>>()
+    val themeChanged: LiveData<Event<Boolean>> = _themeChanged
 
     fun onScreenOpened() {
         val themeSettings = getThemeSettingsInteractor.execute()
 
-        screenStateMutable.value = SettingsScreenState(
+        _screenState.value = SettingsScreenState(
             themeSettings.darkTheme
         )
     }
@@ -31,8 +31,8 @@ class SettingsViewModel(
             ThemeSettings(isChecked)
         )
 
-        screenStateMutable.value = SettingsScreenState(isChecked)
+        _screenState.value = SettingsScreenState(isChecked)
 
-        themeChangedMutable.value = Event(isChecked)
+        _themeChanged.value = Event(isChecked)
     }
 }

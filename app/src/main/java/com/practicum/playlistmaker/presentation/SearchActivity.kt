@@ -174,7 +174,7 @@ class SearchActivity : AppCompatActivity() {
             render(state)
         }
 
-        viewModel.openPlayer.observe(this) { event ->
+        viewModel.navEvents.observe(this) { event ->
             event.getContentIfNotHandled()?.let { track ->
                 openPlayer(track)
             }
