@@ -13,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -27,18 +28,9 @@ import java.util.Locale
 class MediaActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMediaBinding
+    private lateinit var viewModel: MediaViewModel
 
-    private var mediaPlayer = MediaPlayer()
-    private var playerState = STATE_DEFAULT
-    private val handler = Handler(Looper.getMainLooper())
-    private val updateTimerRunnable = object : Runnable {
-        override fun run() {
-            if (playerState == STATE_PLAYING) {
-                binding.time.text = formatTime(mediaPlayer.currentPosition.toLong())
-                handler.postDelayed(this, DELAY)
-            }
-        }
-    }
+    private var currentArtworkUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,74 +40,115 @@ class MediaActivity : AppCompatActivity() {
         binding = ActivityMediaBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        val track = getTrackFromIntent()
 
-        binding.toolbar.setNavigationOnClickListener {
+        if (track == null) {
             finish()
+            return
         }
 
-        renderTrack()
+        viewModel = ViewModelProvider(
+            this,
+            MediaViewModelFactory(track)
+        )[MediaViewModel::class.java]
+
+        setupInsets()
+        setupListeners()
+        observeViewModel()
+
+        viewModel.onScreenOpened()
     }
 
-    private fun renderTrack() {
-
+    private fun getTrackFromIntent(): Track? {
         val trackParcelable = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(EXTRA_TRACK, TrackParcelable::class.java)
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(EXTRA_TRACK)
-        } ?: return
+        }
 
-        val track = TrackParcelableMapper.mapToTrack(trackParcelable)
+        return trackParcelable?.let {
+            TrackParcelableMapper.mapToTrack(it)
+        }
+    }
 
-        val previewUrl = track.previewUrl
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
+            insets
+        }
+    }
 
-        if (!previewUrl.isNullOrBlank()) {
-            preparePlayer(previewUrl)
+    private fun setupListeners() {
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
         }
 
         binding.play.setOnClickListener {
-            playbackControl()
+            viewModel.onPlayButtonClicked()
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.screenState.observe(this) { state ->
+            render(state)
+        }
+    }
+
+    private fun render(state: MediaScreenState) {
+        binding.trackName.text = state.trackName
+        binding.executor.text = state.artistName
+        binding.time.text = state.progress
+        binding.durationValue.text = state.duration
+        binding.genreValue.text = state.genre
+        binding.countryValue.text = state.country
+
+        binding.play.isEnabled = state.isPlayButtonEnabled
+
+        if (state.isPlaying) {
+            binding.play.setImageResource(R.drawable.button_play_pause)
+        } else {
+            binding.play.setImageResource(R.drawable.button_play)
         }
 
-        binding.trackName.text = track.trackName
-        binding.executor.text = track.artistName
-        binding.time.text = formatTime(0L)
-        binding.durationValue.text = formatTime(track.trackTimeMillis)
         setOptionalField(
             binding.albumTitle,
             binding.albumValue,
-            track.collectionName.orEmpty()
+            state.albumName
         )
+
         setOptionalField(
             binding.yearTitle,
             binding.yearValue,
-            track.releaseDate?.take(4).orEmpty()
+            state.year
         )
-        binding.genreValue.text = track.primaryGenreName.orEmpty()
-        binding.countryValue.text = track.country.orEmpty()
 
-        Glide.with(this)
-            .load(getCoverArtwork(track.artworkUrl100))
-            .placeholder(R.drawable.snake)
-            .error(R.drawable.snake)
-            .transform(
-                CenterCrop(),
-                RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius))
-            )
-            .into(binding.imageCover)
+        if (currentArtworkUrl != state.artworkUrl) {
+            currentArtworkUrl = state.artworkUrl
+
+            Glide.with(this)
+                .load(state.artworkUrl)
+                .placeholder(R.drawable.snake)
+                .error(R.drawable.snake)
+                .transform(
+                    CenterCrop(),
+                    RoundedCorners(resources.getDimensionPixelSize(R.dimen.cover_corner_radius))
+                )
+                .into(binding.imageCover)
+        }
     }
 
-    private fun getCoverArtwork(artworkUrl100: String): String {
-        return artworkUrl100.replaceAfterLast('/', "512x512bb.jpg")
-    }
-
-    private fun setOptionalField(titleView: TextView, valueView: TextView, value: String) {
-
+    private fun setOptionalField(
+        titleView: TextView,
+        valueView: TextView,
+        value: String
+    ) {
         if (value.isEmpty()) {
             titleView.visibility = View.GONE
             valueView.visibility = View.GONE
@@ -126,70 +159,13 @@ class MediaActivity : AppCompatActivity() {
         }
     }
 
-    private fun formatTime(millis: Long): String {
-        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
-    }
-
-    private fun preparePlayer(url: String) {
-        mediaPlayer.setDataSource(url)
-
-        mediaPlayer.setOnPreparedListener {
-            playerState = STATE_PREPARED
-        }
-
-        mediaPlayer.setOnCompletionListener {
-            binding.play.setImageResource(R.drawable.button_play)
-            binding.time.text = formatTime(0L)
-            playerState = STATE_PREPARED
-            handler.removeCallbacks(updateTimerRunnable)
-        }
-
-        mediaPlayer.prepareAsync()
-    }
-
-    private fun playbackControl() {
-        when (playerState) {
-            STATE_PLAYING -> pausePlayer()
-            STATE_PREPARED, STATE_PAUSED -> startPlayer()
-        }
-    }
-
-    private fun startPlayer() {
-        mediaPlayer.start()
-        binding.play.setImageResource(R.drawable.button_play_pause)
-        playerState = STATE_PLAYING
-        handler.post(updateTimerRunnable)
-    }
-
-    private fun pausePlayer() {
-        mediaPlayer.pause()
-        binding.play.setImageResource(R.drawable.button_play)
-        playerState = STATE_PAUSED
-        handler.removeCallbacks(updateTimerRunnable)
-    }
-
     override fun onPause() {
         super.onPause()
-        if (playerState == STATE_PLAYING) {
-            pausePlayer()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        handler.removeCallbacks(updateTimerRunnable)
-        mediaPlayer.release()
+        viewModel.pausePlayer()
     }
 
     companion object {
         private const val EXTRA_TRACK = "track"
-
-        private const val STATE_DEFAULT = 0
-        private const val STATE_PREPARED = 1
-        private const val STATE_PLAYING = 2
-        private const val STATE_PAUSED = 3
-
-        private const val DELAY = 300L
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, MediaActivity::class.java).apply {

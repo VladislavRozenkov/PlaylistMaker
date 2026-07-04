@@ -1,119 +1,152 @@
 package com.practicum.playlistmaker.presentation
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.appbar.MaterialToolbar
+import androidx.lifecycle.ViewModelProvider
 import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
 import com.practicum.playlistmaker.di.Creator
-import com.practicum.playlistmaker.domain.models.ThemeSettings
 
 class SettingsActivity : AppCompatActivity() {
 
-    private val getThemeSettingsInteractor by lazy {
-        Creator.provideGetThemeSettingsInteractor(applicationContext)
-    }
-
-    private val updateThemeSettingsInteractor by lazy {
-        Creator.provideUpdateThemeSettingsInteractor(applicationContext)
-    }
     private lateinit var binding: ActivitySettingsBinding
+    private lateinit var viewModel: SettingsViewModel
+
+    private var isThemeSwitchChangingByCode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-
         enableEdgeToEdge()
 
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModel = ViewModelProvider(
+            this,
+            Creator.provideSettingsViewModelFactory(applicationContext)
+        )[SettingsViewModel::class.java]
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.settings)) { v, insets ->
+        setupInsets()
+        setupListeners()
+        observeViewModel()
+
+        viewModel.onScreenOpened()
+    }
+
+    private fun setupInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(
+                systemBars.left,
+                systemBars.top,
+                systemBars.right,
+                systemBars.bottom
+            )
             insets
         }
+    }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
-        toolbar.setNavigationOnClickListener {
+    private fun setupListeners() {
+        binding.toolbar.setNavigationOnClickListener {
             finish()
         }
 
-        val share = findViewById<TextView>(R.id.share)
-        share.setOnClickListener {
+        binding.share.setOnClickListener {
             shareApp()
         }
 
-        val support = findViewById<TextView>(R.id.support)
-        support.setOnClickListener {
+        binding.support.setOnClickListener {
             sendEmailToSupport()
         }
 
-        val agreement = findViewById<TextView>(R.id.agreement)
-        agreement.setOnClickListener {
-            val offerUrl = getString(R.string.offerUrl)
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(offerUrl))
-            startActivity(intent)
+        binding.agreement.setOnClickListener {
+            openAgreement()
         }
-
-        binding.themeSwitch.isChecked =
-            getThemeSettingsInteractor.execute().darkTheme
 
         binding.themeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            updateThemeSettingsInteractor.execute(
-                ThemeSettings(isChecked)
-            )
-            (applicationContext as App).switchTheme(isChecked)
+            if (!isThemeSwitchChangingByCode) {
+                viewModel.onThemeSwitchChanged(isChecked)
+            }
+        }
+    }
+
+    private fun observeViewModel() {
+        viewModel.screenState.observe(this) { state ->
+            render(state)
         }
 
+        viewModel.themeChanged.observe(this) { event ->
+            event.getContentIfNotHandled()?.let { darkTheme ->
+                (applicationContext as App).switchTheme(darkTheme)
+            }
+        }
+    }
+
+    private fun render(state: SettingsScreenState) {
+        isThemeSwitchChangingByCode = true
+        binding.themeSwitch.isChecked = state.darkTheme
+        isThemeSwitchChangingByCode = false
     }
 
     private fun shareApp() {
-
         val shareText = getString(R.string.shareText)
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
+
         val shareVia = getString(R.string.share_via)
 
-        if (shareIntent.resolveActivity(packageManager) != null) {
+        try {
             startActivity(Intent.createChooser(shareIntent, shareVia))
-        } else {
+        } catch (exception: ActivityNotFoundException) {
             Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
         }
-
     }
 
     private fun sendEmailToSupport() {
-
         val recipientEmail = getString(R.string.recipientEmail)
         val subject = getString(R.string.subject)
         val body = getString(R.string.body)
 
-        val emailIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "message/rfc822"
-            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipientEmail))
-            putExtra(Intent.EXTRA_SUBJECT, subject)
-            putExtra(Intent.EXTRA_TEXT, body)
-        }
+        val emailUri = Uri.parse("mailto:$recipientEmail")
+            .buildUpon()
+            .appendQueryParameter("subject", subject)
+            .appendQueryParameter("body", body)
+            .build()
 
-        if (emailIntent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(emailIntent, getString(R.string.email_chooser_title)))
-        } else {
-            Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
-        }
+        val emailIntent = Intent(Intent.ACTION_SENDTO, emailUri)
 
+        try {
+            startActivity(
+                Intent.createChooser(
+                    emailIntent,
+                    getString(R.string.email_chooser_title)
+                )
+            )
+        } catch (exception: ActivityNotFoundException) {
+            Toast.makeText(
+                this,
+                R.string.toastText,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun openAgreement() {
+        val offerUrl = getString(R.string.offerUrl)
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(offerUrl))
+        startActivity(intent)
     }
 
 }

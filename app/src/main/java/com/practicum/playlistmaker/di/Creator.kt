@@ -3,6 +3,7 @@ package com.practicum.playlistmaker.di
 import android.content.Context
 import com.practicum.playlistmaker.data.mapper.TrackMapper
 import com.practicum.playlistmaker.data.network.ItunesApi
+import com.practicum.playlistmaker.data.network.ItunesApiClient
 import com.practicum.playlistmaker.data.repository.SearchHistoryRepositoryImpl
 import com.practicum.playlistmaker.data.repository.SettingsRepositoryImpl
 import com.practicum.playlistmaker.data.repository.TracksRepositoryImpl
@@ -23,24 +24,18 @@ import com.practicum.playlistmaker.domain.interactor.UpdateThemeSettingsInteract
 import com.practicum.playlistmaker.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.repository.SettingsRepository
 import com.practicum.playlistmaker.domain.repository.TracksRepository
+import com.practicum.playlistmaker.presentation.MainViewModelFactory
+import com.practicum.playlistmaker.presentation.SearchViewModelFactory
+import com.practicum.playlistmaker.presentation.SettingsViewModelFactory
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object Creator {
 
-    private const val ITUNES_BASE_URL = "https://itunes.apple.com/"
-
-    private val retrofit = Retrofit.Builder()
-        .baseUrl(ITUNES_BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
-
-    private val api = retrofit.create(ItunesApi::class.java)
-
     private val trackMapper = TrackMapper()
 
     private val tracksRepository: TracksRepository = TracksRepositoryImpl(
-        api,
+        ItunesApiClient.api,
         trackMapper
     )
 
@@ -88,6 +83,28 @@ object Creator {
     fun provideUpdateThemeSettingsInteractor(context: Context): UpdateThemeSettingsInteractor {
         return UpdateThemeSettingsInteractorImpl(
             provideSettingsRepository(context)
+        )
+    }
+
+    fun provideSearchViewModelFactory(context: Context): SearchViewModelFactory {
+        return SearchViewModelFactory(
+            provideSearchTracksInteractor(),
+            provideGetSearchHistoryInteractor(context),
+            provideAddTrackToHistoryInteractor(context),
+            provideClearSearchHistoryInteractor(context)
+        )
+    }
+
+    fun provideSettingsViewModelFactory(context: Context): SettingsViewModelFactory {
+        return SettingsViewModelFactory(
+            provideGetThemeSettingsInteractor(context),
+            provideUpdateThemeSettingsInteractor(context)
+        )
+    }
+
+    fun provideMainViewModelFactory(context: Context): MainViewModelFactory {
+        return MainViewModelFactory(
+            provideGetSearchHistoryInteractor(context)
         )
     }
 
