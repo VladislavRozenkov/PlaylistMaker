@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
-import com.practicum.playlistmaker.di.Creator
 
 class SettingsActivity : AppCompatActivity() {
 
