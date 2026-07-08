@@ -16,37 +16,37 @@ import org.koin.dsl.module
 
 val domainModule = module {
 
-    single<SearchTracksInteractor> {
+    factory<SearchTracksInteractor> {
         SearchTracksInteractorImpl(
             get()
         )
     }
 
-    single<GetSearchHistoryInteractor> {
+    factory<GetSearchHistoryInteractor> {
         GetSearchHistoryInteractorImpl(
             get()
         )
     }
 
-    single<AddTrackToHistoryInteractor> {
+    factory<AddTrackToHistoryInteractor> {
         AddTrackToHistoryInteractorImpl(
             get()
         )
     }
 
-    single<ClearSearchHistoryInteractor> {
+    factory<ClearSearchHistoryInteractor> {
         ClearSearchHistoryInteractorImpl(
             get()
         )
     }
 
-    single<GetThemeSettingsInteractor> {
+    factory<GetThemeSettingsInteractor> {
         GetThemeSettingsInteractorImpl(
             get()
         )
     }
 
-    single<UpdateThemeSettingsInteractor> {
+    factory<UpdateThemeSettingsInteractor> {
         UpdateThemeSettingsInteractorImpl(
             get()
         )
