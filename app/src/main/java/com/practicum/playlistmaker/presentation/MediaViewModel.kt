@@ -21,8 +21,8 @@ class MediaViewModel(
     private var isPlayerInitialized = false
     private var currentProgress = 0L
 
-    private val screenStateMutable = MutableLiveData<MediaScreenState>()
-    val screenState: LiveData<MediaScreenState> = screenStateMutable
+    private val _screenState = MutableLiveData<MediaScreenState>()
+    val screenState: LiveData<MediaScreenState> = _screenState
 
     private val updateTimerRunnable = object : Runnable {
         override fun run() {
@@ -127,7 +127,7 @@ class MediaViewModel(
         isPlayButtonEnabled: Boolean = playerState != PlayerState.DEFAULT &&
                 track.previewUrl?.isNotBlank() == true
     ) {
-        screenStateMutable.value = MediaScreenState(
+        _screenState.value = MediaScreenState(
             track.trackName,
             track.artistName,
             getCoverArtwork(track.artworkUrl100),

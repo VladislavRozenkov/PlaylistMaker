@@ -56,4 +56,6 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.11.0")
+    implementation(platform("io.insert-koin:koin-bom:4.1.1"))
+    implementation("io.insert-koin:koin-android")
 }

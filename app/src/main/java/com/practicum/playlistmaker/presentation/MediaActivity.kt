@@ -13,7 +13,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -24,12 +23,16 @@ import com.practicum.playlistmaker.presentation.mapper.TrackParcelableMapper
 import com.practicum.playlistmaker.presentation.models.TrackParcelable
 import java.text.SimpleDateFormat
 import java.util.Locale
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class MediaActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMediaBinding
-    private lateinit var viewModel: MediaViewModel
-
+    private lateinit var currentTrack: Track
+    private val viewModel: MediaViewModel by viewModel {
+        parametersOf(currentTrack)
+    }
     private var currentArtworkUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,10 +50,7 @@ class MediaActivity : AppCompatActivity() {
             return
         }
 
-        viewModel = ViewModelProvider(
-            this,
-            MediaViewModelFactory(track)
-        )[MediaViewModel::class.java]
+        currentTrack = track
 
         setupInsets()
         setupListeners()

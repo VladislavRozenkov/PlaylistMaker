@@ -9,17 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
-import com.practicum.playlistmaker.di.Creator
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
-    private lateinit var viewModel: SettingsViewModel
-
+    private val viewModel: SettingsViewModel by viewModel()
     private var isThemeSwitchChangingByCode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,11 +27,6 @@ class SettingsActivity : AppCompatActivity() {
 
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        viewModel = ViewModelProvider(
-            this,
-            Creator.provideSettingsViewModelFactory(applicationContext)
-        )[SettingsViewModel::class.java]
 
         setupInsets()
         setupListeners()

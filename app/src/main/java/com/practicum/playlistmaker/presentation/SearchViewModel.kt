@@ -24,11 +24,11 @@ class SearchViewModel(
     private var isClickAllowed = true
     private var isScreenInitialized = false
 
-    private val screenStateMutable = MutableLiveData<SearchScreenState>()
-    val screenState: LiveData<SearchScreenState> = screenStateMutable
+    private val _screenState = MutableLiveData<SearchScreenState>()
+    val screenState: LiveData<SearchScreenState> = _screenState
 
-    private val openPlayerMutable = MutableLiveData<Event<Track>>()
-    val openPlayer: LiveData<Event<Track>> = openPlayerMutable
+    private val _navEvents = MutableLiveData<Event<Track>>()
+    val navEvents: LiveData<Event<Track>> = _navEvents
 
     private val searchRunnable = Runnable {
         if (lastSearchQuery.isNotEmpty()) {
@@ -53,7 +53,7 @@ class SearchViewModel(
             showHistoryOrEmptyInput()
         } else {
             if (hasFocus) {
-                screenStateMutable.value = SearchScreenState.EmptyInput
+                _screenState.value = SearchScreenState.EmptyInput
             }
 
             searchDebounce(query)
@@ -64,7 +64,7 @@ class SearchViewModel(
         if (hasFocus && currentText.isEmpty()) {
             showHistoryOrEmptyInput()
         } else if (currentText.isEmpty()) {
-            screenStateMutable.value = SearchScreenState.EmptyInput
+            _screenState.value = SearchScreenState.EmptyInput
         }
     }
 
@@ -85,7 +85,7 @@ class SearchViewModel(
 
     fun clearHistory() {
         clearSearchHistoryInteractor.execute()
-        screenStateMutable.value = SearchScreenState.EmptyInput
+        _screenState.value = SearchScreenState.EmptyInput
     }
 
     fun onTrackClicked(track: Track) {
@@ -95,7 +95,7 @@ class SearchViewModel(
             if (currentText.isEmpty()) {
                 showHistoryOrEmptyInput()
             }
-            openPlayerMutable.value = Event(track)
+            _navEvents.value = Event(track)
         }
     }
 
@@ -107,19 +107,19 @@ class SearchViewModel(
 
     private fun searchTracks(query: String) {
         lastSearchQuery = query
-        screenStateMutable.value = SearchScreenState.Loading
+        _screenState.value = SearchScreenState.Loading
 
         searchTracksInteractor.execute(
             query,
             { tracks ->
                 if (tracks.isEmpty()) {
-                    screenStateMutable.postValue(SearchScreenState.EmptyResult)
+                    _screenState.postValue(SearchScreenState.EmptyResult)
                 } else {
-                    screenStateMutable.postValue(SearchScreenState.Content(tracks))
+                    _screenState.postValue(SearchScreenState.Content(tracks))
                 }
             },
             {
-                screenStateMutable.postValue(SearchScreenState.Error)
+                _screenState.postValue(SearchScreenState.Error)
             }
         )
     }
@@ -128,9 +128,9 @@ class SearchViewModel(
         val history = getSearchHistoryInteractor.execute()
 
         if (history.isEmpty()) {
-            screenStateMutable.value = SearchScreenState.EmptyInput
+            _screenState.value = SearchScreenState.EmptyInput
         } else {
-            screenStateMutable.value = SearchScreenState.History(history)
+            _screenState.value = SearchScreenState.History(history)
         }
     }
 

@@ -10,12 +10,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
-import com.practicum.playlistmaker.di.Creator
 import com.practicum.playlistmaker.domain.models.Track
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
@@ -27,7 +26,7 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
     private lateinit var trackAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModel()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,11 +36,6 @@ class SearchActivity : AppCompatActivity() {
 
         binding = ActivitySearchBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        viewModel = ViewModelProvider(
-            this,
-            Creator.provideSearchViewModelFactory(applicationContext)
-        )[SearchViewModel::class.java]
 
         setupInsets()
         setupRecyclerViews()
@@ -174,7 +168,7 @@ class SearchActivity : AppCompatActivity() {
             render(state)
         }
 
-        viewModel.openPlayer.observe(this) { event ->
+        viewModel.navEvents.observe(this) { event ->
             event.getContentIfNotHandled()?.let { track ->
                 openPlayer(track)
             }
