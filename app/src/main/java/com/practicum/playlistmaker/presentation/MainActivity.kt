@@ -12,7 +12,6 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupListeners()
-        observeViewModel()
     }
 
     private fun setupListeners() {
@@ -30,33 +28,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.media.setOnClickListener {
-            viewModel.onMediaClicked()
+            startActivity(
+                Intent(this, MediaLibraryActivity::class.java)
+            )
         }
 
         binding.settings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-    }
-
-    private fun observeViewModel() {
-        viewModel.openLastTrack.observe(this) { event ->
-            event.getContentIfNotHandled()?.let { track ->
-                openPlayer(track)
-            }
-        }
-
-        viewModel.showNoLastTrackMessage.observe(this) { event ->
-            event.getContentIfNotHandled()?.let {
-                Toast.makeText(
-                    this,
-                    getString(R.string.no_last_track),
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    private fun openPlayer(track: Track) {
-        startActivity(MediaActivity.createIntent(this, track))
     }
 }

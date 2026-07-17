@@ -32,4 +32,7 @@
     <string name="genre">Жанр</string>
     <string name="country">Страна</string>
     <string name="no_last_track">Сначала выберите трек в поиске</string>
+    <string name="media_library">Медиатека</string>
+    <string name="playlists">Плейлисты</string>
+    <string name="favorite_tracks">Избранные треки</string>
 </resources>

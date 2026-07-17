@@ -27,6 +27,10 @@
             android:exported="false"
             android:theme="@style/Theme.PlaylistMaker.Settings" />
         <activity
+            android:name=".presentation.MediaLibraryActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PlaylistMaker.MediaLibrary" />
+        <activity
             android:name=".presentation.MainActivity"
             android:exported="true">
             <intent-filter>
