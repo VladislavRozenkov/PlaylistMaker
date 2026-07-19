@@ -4,6 +4,7 @@ import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.presentation.FavoriteTracksViewModel
 import com.practicum.playlistmaker.presentation.MainViewModel
 import com.practicum.playlistmaker.presentation.MediaViewModel
+import com.practicum.playlistmaker.presentation.PlaylistsViewModel
 import com.practicum.playlistmaker.presentation.SearchViewModel
 import com.practicum.playlistmaker.presentation.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -41,5 +42,9 @@ val viewModelModule = module {
 
     viewModel {
         FavoriteTracksViewModel()
+    }
+
+    viewModel {
+        PlaylistsViewModel()
     }
 }

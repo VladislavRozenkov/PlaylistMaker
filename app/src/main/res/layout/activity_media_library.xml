@@ -11,15 +11,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:navigationIcon="@drawable/arrow"
+        android:background="?attr/colorSurface"
         app:contentInsetStartWithNavigation="12dp"
         app:title="@string/media_library"
+        app:titleTextColor="?attr/colorOnSurface"
         app:titleTextAppearance="@style/AppToolbarTitleStyle"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         app:tabGravity="fill"
         app:tabMode="fixed"
         app:tabIndicatorFullWidth="false"
