@@ -40,10 +40,8 @@ class MediaLibraryActivity : AppCompatActivity() {
                 MediaLibraryPagerAdapter.FAVORITE_TRACKS_POSITION ->
                     getString(R.string.favorite_tracks)
 
-                MediaLibraryPagerAdapter.PLAYLISTS_POSITION ->
+                else ->
                     getString(R.string.playlists)
-
-                else -> ""
             }
         }
 

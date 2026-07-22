@@ -62,4 +62,10 @@
         <item name="android:textColor">?attr/colorOnSurface</item>
     </style>
 
+    <style name="PlaylistMakerTabTextAppearance"
+        parent="TextAppearance.MaterialComponents.Button">
+
+        <item name="android:textAllCaps">false</item>
+    </style>
+
 </resources>

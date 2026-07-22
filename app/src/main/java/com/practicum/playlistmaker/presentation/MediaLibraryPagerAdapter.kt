@@ -17,17 +17,13 @@ class MediaLibraryPagerAdapter(
             FAVORITE_TRACKS_POSITION ->
                 FavoriteTracksFragment.newInstance()
 
-            PLAYLISTS_POSITION ->
-                PlaylistsFragment.newInstance()
-
             else ->
-                throw IllegalArgumentException("Неизвестная позиция: $position")
+                PlaylistsFragment.newInstance()
         }
     }
 
     companion object {
         const val FAVORITE_TRACKS_POSITION = 0
-        const val PLAYLISTS_POSITION = 1
         private const val PAGE_COUNT = 2
     }
 }

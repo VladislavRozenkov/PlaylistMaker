@@ -22,6 +22,7 @@
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:tabTextAppearance="@style/PlaylistMakerTabTextAppearance"
         app:tabGravity="fill"
         app:tabMode="fixed"
         app:tabIndicatorFullWidth="false"
