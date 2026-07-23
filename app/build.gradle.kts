@@ -58,4 +58,5 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.11.0")
     implementation(platform("io.insert-koin:koin-bom:4.1.1"))
     implementation("io.insert-koin:koin-android")
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
 }

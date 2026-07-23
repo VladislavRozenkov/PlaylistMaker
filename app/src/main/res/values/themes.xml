@@ -26,4 +26,6 @@
         <item name="searchSecondaryTextColor">@color/gray</item>
     </style>
 
+    <style name="Theme.PlaylistMaker.MediaLibrary" parent="Theme.PlaylistMaker" />
+
 </resources>

@@ -35,4 +35,11 @@
         <item name="searchSecondaryTextColor">@color/white</item>
     </style>
 
+    <style name="Theme.PlaylistMaker.MediaLibrary" parent="Theme.PlaylistMaker" >
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">@color/white</item>
+        <item name="colorControlNormal">@color/white</item>
+
+    </style>
+
 </resources>
