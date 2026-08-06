@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivityMainBinding
 import com.practicum.playlistmaker.domain.models.Track
@@ -19,22 +22,26 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupListeners()
+        setupNavigation()
     }
 
-    private fun setupListeners() {
-        binding.search.setOnClickListener {
-            startActivity(Intent(this, SearchActivity::class.java))
-        }
+    private fun setupNavigation() {
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(
+                R.id.navHostFragment
+            ) as NavHostFragment
 
-        binding.media.setOnClickListener {
-            startActivity(
-                Intent(this, MediaLibraryActivity::class.java)
-            )
-        }
+        val navController = navHostFragment.navController
 
-        binding.settings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
+        binding.bottomNavigationView.setupWithNavController(
+            navController
+        )
+
+        navController.addOnDestinationChangedListener {
+                _, destination, _ ->
+
+            binding.bottomNavigationView.isVisible =
+                destination.id != R.id.mediaFragment
         }
     }
 }

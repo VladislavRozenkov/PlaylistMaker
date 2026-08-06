@@ -15,6 +15,7 @@ import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.domain.models.Track
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import androidx.navigation.fragment.findNavController
 
 class SearchFragment : Fragment() {
 
@@ -299,12 +300,10 @@ class SearchFragment : Fragment() {
     }
 
     private fun openPlayer(track: Track) {
-        val intent = MediaActivity.createIntent(
-            requireContext(),
-            track
+        findNavController().navigate(
+            R.id.action_searchFragment_to_mediaFragment,
+            MediaFragment.createArgs(track)
         )
-
-        startActivity(intent)
     }
 
     private fun hideKeyboard() {
