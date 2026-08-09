@@ -63,8 +63,8 @@ dependencies {
     val navigationVersion = "2.9.8"
 
     implementation(
-        "androidx.navigation:navigation-fragment-ktx:\$navigationVersion"
+        "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
     )
 
-    implementation("androidx.navigation:navigation-ui-ktx:${navigationVersion}")
+    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
 }
