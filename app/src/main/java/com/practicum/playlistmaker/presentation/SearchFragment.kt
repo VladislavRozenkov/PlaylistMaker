@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
@@ -157,12 +158,7 @@ class SearchFragment : Fragment() {
                 override fun afterTextChanged(text: Editable?) {
                     val searchText = text?.toString().orEmpty()
 
-                    binding.clearIcon.visibility =
-                        if (searchText.isEmpty()) {
-                            View.GONE
-                        } else {
-                            View.VISIBLE
-                        }
+                    binding.clearIcon.isVisible = searchText.isNotEmpty()
 
                     viewModel.onSearchTextChanged(
                         searchText,
