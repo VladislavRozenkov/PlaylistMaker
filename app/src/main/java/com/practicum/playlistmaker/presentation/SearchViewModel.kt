@@ -112,14 +112,20 @@ class SearchViewModel(
         searchTracksInteractor.execute(
             query,
             { tracks ->
-                if (tracks.isEmpty()) {
-                    _screenState.postValue(SearchScreenState.EmptyResult)
-                } else {
-                    _screenState.postValue(SearchScreenState.Content(tracks))
+                if (query == lastSearchQuery) {
+                    if (tracks.isEmpty()) {
+                        _screenState.postValue(SearchScreenState.EmptyResult)
+                    } else {
+                        _screenState.postValue(
+                            SearchScreenState.Content(tracks)
+                        )
+                    }
                 }
             },
             {
-                _screenState.postValue(SearchScreenState.Error)
+                if (query == lastSearchQuery) {
+                    _screenState.postValue(SearchScreenState.Error)
+                }
             }
         )
     }

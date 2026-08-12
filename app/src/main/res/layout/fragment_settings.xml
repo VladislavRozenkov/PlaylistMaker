@@ -12,13 +12,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface"
-        app:contentInsetStartWithNavigation="12dp"
+        app:contentInsetStart="16dp"
         app:title="@string/settings_title"
-        app:navigationIcon="@drawable/arrow"
         app:titleTextColor="?attr/colorOnSurface"
-        app:navigationIconTint="?attr/colorOnSurface"
         app:titleTextAppearance="@style/AppToolbarTitleStyle"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.switchmaterial.SwitchMaterial
         android:id="@+id/theme_switch"

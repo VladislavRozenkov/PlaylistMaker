@@ -4,55 +4,53 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.practicum.playlistmaker.App
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
+import com.practicum.playlistmaker.databinding.FragmentSettingsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsFragment : Fragment() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private var _binding: FragmentSettingsBinding? = null
+
+    private val binding: FragmentSettingsBinding
+        get() = _binding!!
+
     private val viewModel: SettingsViewModel by viewModel()
+
     private var isThemeSwitchChangingByCode = false
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSettingsBinding.inflate(
+            inflater,
+            container,
+            false
+        )
 
-        enableEdgeToEdge()
+        return binding.root
+    }
 
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(
+        view: View,
+        savedInstanceState: Bundle?
+    ) {
+        super.onViewCreated(view, savedInstanceState)
 
-        setupInsets()
         setupListeners()
         observeViewModel()
-
         viewModel.onScreenOpened()
     }
 
-    private fun setupInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(
-                systemBars.left,
-                systemBars.top,
-                systemBars.right,
-                systemBars.bottom
-            )
-            insets
-        }
-    }
-
     private fun setupListeners() {
-        binding.toolbar.setNavigationOnClickListener {
-            finish()
-        }
-
         binding.share.setOnClickListener {
             shareApp()
         }
@@ -73,13 +71,14 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.screenState.observe(this) { state ->
+        viewModel.screenState.observe(viewLifecycleOwner) { state ->
             render(state)
         }
 
-        viewModel.themeChanged.observe(this) { event ->
+        viewModel.themeChanged.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { darkTheme ->
-                (applicationContext as App).switchTheme(darkTheme)
+                val app = requireActivity().application as App
+                app.switchTheme(darkTheme)
             }
         }
     }
@@ -98,12 +97,19 @@ class SettingsActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
 
-        val shareVia = getString(R.string.share_via)
+        val chooserIntent = Intent.createChooser(
+            shareIntent,
+            getString(R.string.share_via)
+        )
 
         try {
-            startActivity(Intent.createChooser(shareIntent, shareVia))
+            startActivity(chooserIntent)
         } catch (exception: ActivityNotFoundException) {
-            Toast.makeText(this, R.string.toastText, Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                R.string.toastText,
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -118,18 +124,21 @@ class SettingsActivity : AppCompatActivity() {
             .appendQueryParameter("body", body)
             .build()
 
-        val emailIntent = Intent(Intent.ACTION_SENDTO, emailUri)
+        val emailIntent = Intent(
+            Intent.ACTION_SEND,
+            emailUri
+        )
+
+        val chooserIntent = Intent.createChooser(
+            emailIntent,
+            getString(R.string.email_chooser_title)
+        )
 
         try {
-            startActivity(
-                Intent.createChooser(
-                    emailIntent,
-                    getString(R.string.email_chooser_title)
-                )
-            )
+            startActivity(chooserIntent)
         } catch (exception: ActivityNotFoundException) {
             Toast.makeText(
-                this,
+                requireContext(),
                 R.string.toastText,
                 Toast.LENGTH_SHORT
             ).show()
@@ -138,8 +147,17 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun openAgreement() {
         val offerUrl = getString(R.string.offerUrl)
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(offerUrl))
+
+        val intent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(offerUrl)
+        )
+
         startActivity(intent)
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

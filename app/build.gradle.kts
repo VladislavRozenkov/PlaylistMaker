@@ -59,4 +59,12 @@ dependencies {
     implementation(platform("io.insert-koin:koin-bom:4.1.1"))
     implementation("io.insert-koin:koin-android")
     implementation("androidx.viewpager2:viewpager2:1.1.0")
+
+    val navigationVersion = "2.9.8"
+
+    implementation(
+        "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
+    )
+
+    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
 }

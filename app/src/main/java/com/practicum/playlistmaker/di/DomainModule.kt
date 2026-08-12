@@ -2,6 +2,8 @@ package com.practicum.playlistmaker.di
 
 import com.practicum.playlistmaker.domain.interactor.AddTrackToHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.AddTrackToHistoryInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.AudioPlayerInteractor
+import com.practicum.playlistmaker.domain.interactor.AudioPlayerInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.ClearSearchHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.ClearSearchHistoryInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.GetSearchHistoryInteractor
@@ -48,6 +50,12 @@ val domainModule = module {
 
     factory<UpdateThemeSettingsInteractor> {
         UpdateThemeSettingsInteractorImpl(
+            get()
+        )
+    }
+
+    factory<AudioPlayerInteractor> {
+        AudioPlayerInteractorImpl(
             get()
         )
     }

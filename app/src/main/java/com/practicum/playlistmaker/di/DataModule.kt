@@ -2,11 +2,13 @@ package com.practicum.playlistmaker.di
 
 import com.practicum.playlistmaker.data.mapper.TrackMapper
 import com.practicum.playlistmaker.data.network.ItunesApi
+import com.practicum.playlistmaker.data.repository.AudioPlayerRepositoryImpl
 import com.practicum.playlistmaker.data.repository.SearchHistoryRepositoryImpl
 import com.practicum.playlistmaker.data.repository.SettingsRepositoryImpl
 import com.practicum.playlistmaker.data.repository.TracksRepositoryImpl
 import com.practicum.playlistmaker.data.storage.SearchHistoryStorage
 import com.practicum.playlistmaker.data.storage.SettingsStorage
+import com.practicum.playlistmaker.domain.repository.AudioPlayerRepository
 import com.practicum.playlistmaker.domain.repository.SearchHistoryRepository
 import com.practicum.playlistmaker.domain.repository.SettingsRepository
 import com.practicum.playlistmaker.domain.repository.TracksRepository
@@ -60,5 +62,9 @@ val dataModule = module {
         SettingsRepositoryImpl(
             get()
         )
+    }
+
+    factory<AudioPlayerRepository> {
+        AudioPlayerRepositoryImpl()
     }
 }

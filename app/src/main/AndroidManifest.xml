@@ -15,24 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PlaylistMaker">
         <activity
-            android:name=".presentation.SearchActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.Search"/>
-        <activity
-            android:name=".presentation.MediaActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.Media"/>
-        <activity
-            android:name=".presentation.SettingsActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.Settings" />
-        <activity
-            android:name=".presentation.MediaLibraryActivity"
-            android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.MediaLibrary" />
-        <activity
             android:name=".presentation.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

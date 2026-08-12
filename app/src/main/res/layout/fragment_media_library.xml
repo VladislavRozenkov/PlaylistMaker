@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface">
@@ -10,9 +11,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:navigationIcon="@drawable/arrow"
         android:background="?attr/colorSurface"
-        app:contentInsetStartWithNavigation="12dp"
+        app:contentInsetStart="16dp"
         app:title="@string/media_library"
         app:titleTextColor="?attr/colorOnSurface"
         app:titleTextAppearance="@style/AppToolbarTitleStyle"
@@ -22,16 +22,16 @@
         android:id="@+id/tabLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:tabTextAppearance="@style/PlaylistMakerTabTextAppearance"
         app:tabGravity="fill"
-        app:tabMode="fixed"
-        app:tabIndicatorFullWidth="false"
         app:tabIndicatorColor="?attr/colorOnSurface"
+        app:tabIndicatorFullWidth="false"
+        app:tabMode="fixed"
         app:tabSelectedTextColor="?attr/colorOnSurface"
+        app:tabTextAppearance="@style/PlaylistMakerTabTextAppearance"
         app:tabTextColor="?attr/colorOnSurface"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"

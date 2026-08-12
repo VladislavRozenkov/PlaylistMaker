@@ -6,15 +6,16 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.practicum.playlistmaker.domain.interactor.AudioPlayerInteractor
 import com.practicum.playlistmaker.domain.models.Track
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 class MediaViewModel(
-    private val track: Track
+    private val track: Track,
+    private val audioPlayerInteractor: AudioPlayerInteractor
 ) : ViewModel() {
 
-    private val mediaPlayer = MediaPlayer()
     private val handler = Handler(Looper.getMainLooper())
 
     private var playerState = PlayerState.DEFAULT
@@ -27,8 +28,8 @@ class MediaViewModel(
     private val updateTimerRunnable = object : Runnable {
         override fun run() {
             if (playerState == PlayerState.PLAYING) {
-                currentProgress = mediaPlayer.currentPosition.toLong()
-                renderState(mediaPlayer.currentPosition.toLong())
+                currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
+                renderState(audioPlayerInteractor.getCurrentPosition().toLong())
                 handler.postDelayed(this, TIMER_UPDATE_DELAY)
             }
         }
@@ -57,10 +58,10 @@ class MediaViewModel(
 
     fun pausePlayer() {
         if (playerState == PlayerState.PLAYING) {
-            mediaPlayer.pause()
+            audioPlayerInteractor.pause()
             playerState = PlayerState.PAUSED
             handler.removeCallbacks(updateTimerRunnable)
-            currentProgress = mediaPlayer.currentPosition.toLong()
+            currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
             renderState(currentProgress)
         }
     }
@@ -76,10 +77,10 @@ class MediaViewModel(
             return
         }
 
-        try {
-            mediaPlayer.setDataSource(previewUrl)
+        audioPlayerInteractor.prepare(
+            url = previewUrl,
 
-            mediaPlayer.setOnPreparedListener {
+            onPrepared = {
                 playerState = PlayerState.PREPARED
                 currentProgress = 0L
 
@@ -87,36 +88,39 @@ class MediaViewModel(
                     currentProgress,
                     true
                 )
-            }
+            },
 
-            mediaPlayer.setOnCompletionListener {
+            onCompletion = {
                 playerState = PlayerState.PREPARED
-                handler.removeCallbacks(updateTimerRunnable)
 
-                mediaPlayer.seekTo(0)
+                handler.removeCallbacks(
+                    updateTimerRunnable
+                )
+
+                audioPlayerInteractor.seekTo(0)
+
                 currentProgress = 0L
-
                 renderState(currentProgress)
+            },
+
+            onError = {
+                playerState = PlayerState.DEFAULT
+
+                renderState(
+                    0L,
+                    false
+                )
             }
-
-            mediaPlayer.prepareAsync()
-        } catch (exception: Exception) {
-            playerState = PlayerState.DEFAULT
-
-            renderState(
-                0L,
-                false
-            )
-        }
+        )
     }
 
     private fun startPlayer() {
-        mediaPlayer.start()
+        audioPlayerInteractor.start()
         playerState = PlayerState.PLAYING
 
         handler.removeCallbacks(updateTimerRunnable)
 
-        currentProgress = mediaPlayer.currentPosition.toLong()
+        currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
         renderState(currentProgress)
 
         handler.post(updateTimerRunnable)
@@ -152,8 +156,9 @@ class MediaViewModel(
 
     override fun onCleared() {
         super.onCleared()
+
         handler.removeCallbacks(updateTimerRunnable)
-        mediaPlayer.release()
+        audioPlayerInteractor.release()
     }
 
     private enum class PlayerState {
