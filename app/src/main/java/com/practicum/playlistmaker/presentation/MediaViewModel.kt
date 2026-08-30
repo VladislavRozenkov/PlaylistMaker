@@ -6,8 +6,13 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.domain.interactor.AudioPlayerInteractor
 import com.practicum.playlistmaker.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -16,7 +21,7 @@ class MediaViewModel(
     private val audioPlayerInteractor: AudioPlayerInteractor
 ) : ViewModel() {
 
-    private val handler = Handler(Looper.getMainLooper())
+    private var timerJob: Job? = null
 
     private var playerState = PlayerState.DEFAULT
     private var isPlayerInitialized = false
@@ -25,12 +30,18 @@ class MediaViewModel(
     private val _screenState = MutableLiveData<MediaScreenState>()
     val screenState: LiveData<MediaScreenState> = _screenState
 
-    private val updateTimerRunnable = object : Runnable {
-        override fun run() {
-            if (playerState == PlayerState.PLAYING) {
-                currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
-                renderState(audioPlayerInteractor.getCurrentPosition().toLong())
-                handler.postDelayed(this, TIMER_UPDATE_DELAY)
+    private fun startTimer() {
+        timerJob?.cancel()
+
+        timerJob = viewModelScope.launch {
+            while (playerState == PlayerState.PLAYING) {
+                currentProgress = audioPlayerInteractor
+                    .getCurrentPosition()
+                    .toLong()
+
+                renderState(currentProgress)
+
+                delay(TIMER_UPDATE_DELAY)
             }
         }
     }
@@ -60,8 +71,10 @@ class MediaViewModel(
         if (playerState == PlayerState.PLAYING) {
             audioPlayerInteractor.pause()
             playerState = PlayerState.PAUSED
-            handler.removeCallbacks(updateTimerRunnable)
-            currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
+            timerJob?.cancel()
+            currentProgress = audioPlayerInteractor
+                .getCurrentPosition()
+                .toLong()
             renderState(currentProgress)
         }
     }
@@ -93,9 +106,7 @@ class MediaViewModel(
             onCompletion = {
                 playerState = PlayerState.PREPARED
 
-                handler.removeCallbacks(
-                    updateTimerRunnable
-                )
+                timerJob?.cancel()
 
                 audioPlayerInteractor.seekTo(0)
 
@@ -118,12 +129,7 @@ class MediaViewModel(
         audioPlayerInteractor.start()
         playerState = PlayerState.PLAYING
 
-        handler.removeCallbacks(updateTimerRunnable)
-
-        currentProgress = audioPlayerInteractor.getCurrentPosition().toLong()
-        renderState(currentProgress)
-
-        handler.post(updateTimerRunnable)
+        startTimer()
     }
 
     private fun renderState(
@@ -157,7 +163,6 @@ class MediaViewModel(
     override fun onCleared() {
         super.onCleared()
 
-        handler.removeCallbacks(updateTimerRunnable)
         audioPlayerInteractor.release()
     }
 

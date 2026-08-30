@@ -5,11 +5,15 @@ import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.domain.interactor.AddTrackToHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.ClearSearchHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.GetSearchHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
 import com.practicum.playlistmaker.domain.models.Track
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val searchTracksInteractor: SearchTracksInteractor,
@@ -18,7 +22,7 @@ class SearchViewModel(
     private val clearSearchHistoryInteractor: ClearSearchHistoryInteractor
 ) : ViewModel() {
 
-    private val handler = Handler(Looper.getMainLooper())
+    private var searchJob: Job? = null
     private var lastSearchQuery = ""
     private var currentText = ""
     private var isClickAllowed = true
@@ -26,15 +30,8 @@ class SearchViewModel(
 
     private val _screenState = MutableLiveData<SearchScreenState>()
     val screenState: LiveData<SearchScreenState> = _screenState
-
     private val _navEvents = MutableLiveData<Event<Track>>()
     val navEvents: LiveData<Event<Track>> = _navEvents
-
-    private val searchRunnable = Runnable {
-        if (lastSearchQuery.isNotEmpty()) {
-            searchTracks(lastSearchQuery)
-        }
-    }
 
     fun onScreenOpened() {
         if (!isScreenInitialized) {
@@ -48,7 +45,7 @@ class SearchViewModel(
         val query = text.trim()
 
         if (query.isEmpty()) {
-            handler.removeCallbacks(searchRunnable)
+            searchJob?.cancel()
             lastSearchQuery = ""
             showHistoryOrEmptyInput()
         } else {
@@ -72,7 +69,7 @@ class SearchViewModel(
         val trimmedQuery = query.trim()
 
         if (trimmedQuery.isNotEmpty()) {
-            handler.removeCallbacks(searchRunnable)
+            searchJob?.cancel()
             searchTracks(trimmedQuery)
         }
     }
@@ -101,8 +98,11 @@ class SearchViewModel(
 
     private fun searchDebounce(query: String) {
         lastSearchQuery = query
-        handler.removeCallbacks(searchRunnable)
-        handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(SEARCH_DEBOUNCE_DELAY)
+            searchTracks(query)
+        }
     }
 
     private fun searchTracks(query: String) {
@@ -145,18 +145,14 @@ class SearchViewModel(
 
         if (isClickAllowed) {
             isClickAllowed = false
-            handler.postDelayed(
-                { isClickAllowed = true },
-                CLICK_DEBOUNCE_DELAY
-            )
+
+            viewModelScope.launch {
+                delay(CLICK_DEBOUNCE_DELAY)
+                isClickAllowed = true
+            }
         }
 
         return current
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        handler.removeCallbacks(searchRunnable)
     }
 
     companion object {
