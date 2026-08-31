@@ -5,6 +5,8 @@ import com.practicum.playlistmaker.data.mapper.TrackMapper
 import com.practicum.playlistmaker.data.network.ItunesApi
 import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.domain.repository.TracksRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,31 +16,14 @@ class TracksRepositoryImpl(
     private val mapper: TrackMapper
 ) : TracksRepository {
 
-    override fun searchTracks(
-        query: String,
-        onSuccess: (List<Track>) -> Unit,
-        onError: () -> Unit
-    ) {
-        api.search(query).enqueue(object  : Callback<ItunesResponseDto> {
+    override fun searchTracks(query: String): Flow<List<Track>> = flow {
 
-            override fun onResponse(
-                call: Call<ItunesResponseDto>,
-                response: Response<ItunesResponseDto>
-            ) {
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.results.orEmpty()
-                        .map { trackDto ->
-                            mapper.map(trackDto)
-                        }
-                    onSuccess(tracks)
-                } else {
-                    onError()
-                }
-            }
+        val response = api.search(query)
 
-            override fun onFailure(call : Call<ItunesResponseDto>, t: Throwable) {
-                onError()
-            }
-        } )
+        val tracks = response.results.map { trackDto ->
+            mapper.map(trackDto)
+        }
+
+        emit(tracks)
     }
 }

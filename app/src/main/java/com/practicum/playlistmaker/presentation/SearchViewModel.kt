@@ -13,6 +13,7 @@ import com.practicum.playlistmaker.domain.interactor.SearchTracksInteractor
 import com.practicum.playlistmaker.domain.models.Track
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class SearchViewModel(
@@ -109,25 +110,26 @@ class SearchViewModel(
         lastSearchQuery = query
         _screenState.value = SearchScreenState.Loading
 
-        searchTracksInteractor.execute(
-            query,
-            { tracks ->
-                if (query == lastSearchQuery) {
-                    if (tracks.isEmpty()) {
-                        _screenState.postValue(SearchScreenState.EmptyResult)
-                    } else {
-                        _screenState.postValue(
-                            SearchScreenState.Content(tracks)
-                        )
+        viewModelScope.launch {
+            searchTracksInteractor
+                .execute(query)
+                .catch {
+                    if (query == lastSearchQuery) {
+                        _screenState.value = SearchScreenState.Error
                     }
                 }
-            },
-            {
-                if (query == lastSearchQuery) {
-                    _screenState.postValue(SearchScreenState.Error)
+                .collect { tracks ->
+                    if (query == lastSearchQuery) {
+                        if (tracks.isEmpty()) {
+                            _screenState.value =
+                                SearchScreenState.EmptyResult
+                        } else {
+                            _screenState.value =
+                                SearchScreenState.Content(tracks)
+                        }
+                    }
                 }
-            }
-        )
+        }
     }
 
     private fun showHistoryOrEmptyInput() {

@@ -1,11 +1,10 @@
 package com.practicum.playlistmaker.domain.repository
 
+import android.R
 import com.practicum.playlistmaker.domain.models.Track
+import kotlinx.coroutines.flow.Flow
+import retrofit2.http.Query
 
 interface TracksRepository {
-    fun searchTracks(
-        query: String,
-        onSuccess: (List<Track>) -> Unit,
-        onError: () -> Unit
-    )
+    fun searchTracks(query: String): Flow<List<Track>>
 }
