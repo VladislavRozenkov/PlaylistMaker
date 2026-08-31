@@ -71,13 +71,17 @@ class SearchViewModel(
 
         if (trimmedQuery.isNotEmpty()) {
             searchJob?.cancel()
-            searchTracks(trimmedQuery)
+            searchJob = viewModelScope.launch {
+                searchTracks(trimmedQuery)
+            }
         }
     }
 
     fun retrySearch() {
         if (lastSearchQuery.isNotEmpty()) {
-            searchTracks(lastSearchQuery)
+            searchJob = viewModelScope.launch {
+                searchTracks(lastSearchQuery)
+            }
         }
     }
 
@@ -98,38 +102,39 @@ class SearchViewModel(
     }
 
     private fun searchDebounce(query: String) {
+
         lastSearchQuery = query
+
         searchJob?.cancel()
+
         searchJob = viewModelScope.launch {
             delay(SEARCH_DEBOUNCE_DELAY)
             searchTracks(query)
         }
     }
 
-    private fun searchTracks(query: String) {
+    private suspend fun searchTracks(query: String) {
         lastSearchQuery = query
         _screenState.value = SearchScreenState.Loading
 
-        viewModelScope.launch {
-            searchTracksInteractor
-                .execute(query)
-                .catch {
-                    if (query == lastSearchQuery) {
-                        _screenState.value = SearchScreenState.Error
+        searchTracksInteractor
+            .execute(query)
+            .catch {
+                if (query == lastSearchQuery) {
+                    _screenState.value = SearchScreenState.Error
+                }
+            }
+            .collect { tracks ->
+                if (query == lastSearchQuery) {
+                    if (tracks.isEmpty()) {
+                        _screenState.value =
+                            SearchScreenState.EmptyResult
+                    } else {
+                        _screenState.value =
+                            SearchScreenState.Content(tracks)
                     }
                 }
-                .collect { tracks ->
-                    if (query == lastSearchQuery) {
-                        if (tracks.isEmpty()) {
-                            _screenState.value =
-                                SearchScreenState.EmptyResult
-                        } else {
-                            _screenState.value =
-                                SearchScreenState.Content(tracks)
-                        }
-                    }
-                }
-        }
+            }
     }
 
     private fun showHistoryOrEmptyInput() {
