@@ -1,0 +1,62 @@
+package com.practicum.playlistmaker.search.presentation
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.databinding.ItemTrackBinding
+import com.practicum.playlistmaker.core.domain.model.Track
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+class TrackAdapter(private val tracks: MutableList<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
+
+    var onClick: ((Track) -> Unit)? = null
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TrackViewHolder {
+        val binding = ItemTrackBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return TrackViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
+        val track = tracks[position]
+
+        holder.bind(track)
+
+        holder.itemView.setOnClickListener {
+            onClick?.invoke(track)
+        }
+    }
+
+    override fun getItemCount() = tracks.size
+
+    class TrackViewHolder(private val binding: ItemTrackBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(track: Track) {
+            binding.trackName.text = track.trackName
+            binding.artistName.text = track.artistName
+            binding.tvTrackTime.text = formatTime(track.trackTimeMillis)
+
+            Glide.with(binding.ivArt.context)
+                .load(track.artworkUrl100)
+                .placeholder(R.drawable.snake)
+                .error(R.drawable.snake)
+                .transform(CenterCrop(), RoundedCorners(2))
+                .into(binding.ivArt)
+        }
+
+        private fun formatTime(millis: Long): String {
+            return SimpleDateFormat("mm:ss", Locale.getDefault()).format(millis)
+        }
+
+    }
+
+    fun updateTracks(newTracks: List<Track>) {
+        tracks.clear()
+        tracks.addAll(newTracks)
+        notifyDataSetChanged()
+    }
+}
