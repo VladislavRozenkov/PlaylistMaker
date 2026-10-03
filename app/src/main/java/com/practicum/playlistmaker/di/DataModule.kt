@@ -1,5 +1,12 @@
 package com.practicum.playlistmaker.di
 
+import androidx.room.Room
+import com.practicum.playlistmaker.media_library.favorites.data.db.AppDatabase
+import com.practicum.playlistmaker.media_library.favorites.data.mapper.FavoriteTrackMapper
+import com.practicum.playlistmaker.media_library.favorites.data.repository.FavoriteTracksRepositoryImpl
+import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractor
+import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractorImpl
+import com.practicum.playlistmaker.media_library.favorites.domain.repository.FavoriteTracksRepository
 import com.practicum.playlistmaker.search.data.mapper.TrackMapper
 import com.practicum.playlistmaker.search.data.network.ItunesApi
 import com.practicum.playlistmaker.player.data.repository.AudioPlayerRepositoryImpl
@@ -20,6 +27,31 @@ import retrofit2.converter.gson.GsonConverterFactory
 private const val BASE_URL = "https://itunes.apple.com/"
 
 val dataModule = module {
+
+    factory<FavoriteTracksInteractor> {
+        FavoriteTracksInteractorImpl(
+            get()
+        )
+    }
+
+    single<FavoriteTracksRepository> {
+        FavoriteTracksRepositoryImpl(
+            get(),
+            get()
+        )
+    }
+
+    single {
+        FavoriteTrackMapper()
+    }
+
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "playlist_maker.db"
+        ).build()
+    }
 
     single {
         TrackMapper()
@@ -46,6 +78,7 @@ val dataModule = module {
 
     single<TracksRepository> {
         TracksRepositoryImpl(
+            get(),
             get(),
             get()
         )
