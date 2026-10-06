@@ -6,7 +6,8 @@ import com.practicum.playlistmaker.search.domain.repository.SearchHistoryReposit
 class GetSearchHistoryInteractorImpl(
     private val repository: SearchHistoryRepository
 ) : GetSearchHistoryInteractor {
-    override fun execute(): List<Track> {
+
+    override suspend fun execute(): List<Track> {
         return repository.getHistory()
     }
 }

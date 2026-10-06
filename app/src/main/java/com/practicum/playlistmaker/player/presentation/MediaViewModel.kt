@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.model.Track
+import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractor
 import com.practicum.playlistmaker.player.domain.interactor.AudioPlayerInteractor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +15,8 @@ import java.util.Locale
 
 class MediaViewModel(
     private val track: Track,
-    private val audioPlayerInteractor: AudioPlayerInteractor
+    private val audioPlayerInteractor: AudioPlayerInteractor,
+    private val favoriteTracksInteractor: FavoriteTracksInteractor
 ) : ViewModel() {
 
     private var timerJob: Job? = null
@@ -128,6 +130,21 @@ class MediaViewModel(
         startTimer()
     }
 
+    fun onFavoriteClicked() {
+        viewModelScope.launch {
+
+            if (track.isFavorite) {
+                favoriteTracksInteractor.deleteTrack(track)
+            } else {
+                favoriteTracksInteractor.addTrack(track)
+            }
+
+            track.isFavorite = !track.isFavorite
+
+            renderState(currentProgress)
+        }
+    }
+
     private fun renderState(
         progress: Long,
         isPlayButtonEnabled: Boolean = playerState != PlayerState.DEFAULT &&
@@ -144,7 +161,8 @@ class MediaViewModel(
             track.country.orEmpty(),
             formatTime(progress),
             playerState == PlayerState.PLAYING,
-            isPlayButtonEnabled
+            isPlayButtonEnabled,
+            track.isFavorite
         )
     }
 

@@ -137,12 +137,14 @@ class SearchViewModel(
     }
 
     private fun showHistoryOrEmptyInput() {
-        val history = getSearchHistoryInteractor.execute()
+        viewModelScope.launch {
+            val history = getSearchHistoryInteractor.execute()
 
-        if (history.isEmpty()) {
-            _screenState.value = SearchScreenState.EmptyInput
-        } else {
-            _screenState.value = SearchScreenState.History(history)
+            if (history.isEmpty()) {
+                _screenState.value = SearchScreenState.EmptyInput
+            } else {
+                _screenState.value = SearchScreenState.History(history)
+            }
         }
     }
 

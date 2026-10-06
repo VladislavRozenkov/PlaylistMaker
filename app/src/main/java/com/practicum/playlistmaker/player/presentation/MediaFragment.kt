@@ -75,6 +75,10 @@ class MediaFragment : Fragment() {
         binding.play.setOnClickListener {
             viewModel.onPlayButtonClicked()
         }
+
+        binding.like.setOnClickListener {
+            viewModel.onFavoriteClicked()
+        }
     }
 
     private fun observeViewModel() {
@@ -131,6 +135,16 @@ class MediaFragment : Fragment() {
                     )
                 )
                 .into(binding.imageCover)
+        }
+
+        if (state.isFavorite) {
+            binding.like.setImageResource(
+                R.drawable.button_like
+            )
+        } else {
+            binding.like.setImageResource(
+                R.drawable.button_not_like
+            )
         }
     }
 

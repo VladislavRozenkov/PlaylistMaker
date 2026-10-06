@@ -11,5 +11,6 @@ data class MediaScreenState(
     val country: String,
     val progress: String,
     val isPlaying: Boolean,
-    val isPlayButtonEnabled: Boolean
+    val isPlayButtonEnabled: Boolean,
+    val isFavorite: Boolean
 )

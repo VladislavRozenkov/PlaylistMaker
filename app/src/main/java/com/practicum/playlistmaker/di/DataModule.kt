@@ -87,6 +87,7 @@ val dataModule = module {
     single<SearchHistoryRepository> {
         SearchHistoryRepositoryImpl(
             get(),
+            get(),
             get()
         )
     }
