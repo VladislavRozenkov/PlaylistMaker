@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.core.domain.model.Track
 import com.practicum.playlistmaker.databinding.FragmentFavoriteTracksBinding
+import com.practicum.playlistmaker.player.presentation.MediaFragment
+import androidx.navigation.fragment.findNavController
 import com.practicum.playlistmaker.search.presentation.TrackAdapter
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -43,6 +45,7 @@ class FavoriteTracksFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupRecyclerView()
+        setupListeners()
         observeViewModel()
     }
 
@@ -85,6 +88,21 @@ class FavoriteTracksFragment : Fragment() {
         binding.favoriteTracksRecyclerView.visibility = View.VISIBLE
         binding.emptyImage.visibility = View.GONE
         binding.emptyMessage.visibility = View.GONE
+    }
+
+    private fun setupListeners() {
+        tracksAdapter.onClick = { track ->
+            openPlayer(track)
+        }
+    }
+
+    private fun openPlayer(track: Track) {
+        requireParentFragment()
+            .findNavController()
+            .navigate(
+                R.id.action_mediaLibraryFragment_to_mediaFragment,
+                MediaFragment.createArgs(track)
+            )
     }
 
     override fun onDestroyView() {
