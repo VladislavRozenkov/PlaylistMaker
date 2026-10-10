@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -75,9 +76,22 @@ class MediaFragment : Fragment() {
         binding.play.setOnClickListener {
             viewModel.onPlayButtonClicked()
         }
+
+        binding.like.setOnClickListener {
+            viewModel.onFavoriteClicked()
+        }
     }
 
     private fun observeViewModel() {
+        viewModel.favoriteError.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.favorite_operation_error,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
         viewModel.screenState.observe(viewLifecycleOwner) { state ->
             render(state)
         }
@@ -90,6 +104,7 @@ class MediaFragment : Fragment() {
         binding.durationValue.text = state.duration
         binding.genreValue.text = state.genre
         binding.countryValue.text = state.country
+        binding.like.isEnabled = state.isFavoriteButtonEnable
 
         binding.play.isEnabled = state.isPlayButtonEnabled
 
@@ -131,6 +146,16 @@ class MediaFragment : Fragment() {
                     )
                 )
                 .into(binding.imageCover)
+        }
+
+        if (state.isFavorite) {
+            binding.like.setImageResource(
+                R.drawable.button_like
+            )
+        } else {
+            binding.like.setImageResource(
+                R.drawable.button_not_like
+            )
         }
     }
 

@@ -91,12 +91,16 @@ class SearchViewModel(
 
     fun onTrackClicked(track: Track) {
         if (clickDebounce()) {
-            addTrackToHistoryInteractor.execute(track)
+            viewModelScope.launch {
 
-            if (currentText.isEmpty()) {
-                showHistoryOrEmptyInput()
+                addTrackToHistoryInteractor.execute(track)
+
+                if (currentText.isEmpty()) {
+                    showHistoryOrEmptyInput()
+                }
+
+                _navEvents.value = Event(track)
             }
-            _navEvents.value = Event(track)
         }
     }
 
@@ -137,12 +141,14 @@ class SearchViewModel(
     }
 
     private fun showHistoryOrEmptyInput() {
-        val history = getSearchHistoryInteractor.execute()
+        viewModelScope.launch {
+            val history = getSearchHistoryInteractor.execute()
 
-        if (history.isEmpty()) {
-            _screenState.value = SearchScreenState.EmptyInput
-        } else {
-            _screenState.value = SearchScreenState.History(history)
+            if (history.isEmpty()) {
+                _screenState.value = SearchScreenState.EmptyInput
+            } else {
+                _screenState.value = SearchScreenState.History(history)
+            }
         }
     }
 
