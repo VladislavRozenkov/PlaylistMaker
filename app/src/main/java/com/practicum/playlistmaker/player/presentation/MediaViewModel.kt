@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.core.domain.model.Track
+import com.practicum.playlistmaker.core.presentation.Event
 import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractor
 import com.practicum.playlistmaker.player.domain.interactor.AudioPlayerInteractor
 import kotlinx.coroutines.CancellationException
@@ -13,17 +14,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.catch
 
 class MediaViewModel(
     private val track: Track,
     private val audioPlayerInteractor: AudioPlayerInteractor,
     private val favoriteTracksInteractor: FavoriteTracksInteractor
 ) : ViewModel() {
-
-    init {
-        observeIsFavoriteState()
-    }
 
     private var timerJob: Job? = null
     private var playerState = PlayerState.DEFAULT
@@ -34,6 +31,13 @@ class MediaViewModel(
 
     private val _screenState = MutableLiveData<MediaScreenState>()
     val screenState: LiveData<MediaScreenState> = _screenState
+
+    private val _favoriteError = MutableLiveData<Event<Unit>>()
+    val favoriteError: LiveData<Event<Unit>> = _favoriteError
+
+    init {
+        observeIsFavoriteState()
+    }
 
     private fun startTimer() {
         timerJob?.cancel()
@@ -155,11 +159,11 @@ class MediaViewModel(
                     favoriteTracksInteractor.deleteTrack(track)
                 }
             } catch (error: CancellationException) {
-                throw  error
-            } catch (error: Exception) {
                 throw error
+            } catch (error: Exception) {
                 pendingFavoriteState = null
                 renderState(currentProgress)
+                _favoriteError.value = Event(Unit)
             }
         }
     }
@@ -182,7 +186,7 @@ class MediaViewModel(
             playerState == PlayerState.PLAYING,
             isPlayButtonEnabled,
             track.isFavorite,
-            isFavoriteLoaded && pendingFavoriteState != null
+            isFavoriteLoaded && pendingFavoriteState == null
         )
     }
 
@@ -198,6 +202,13 @@ class MediaViewModel(
         viewModelScope.launch {
             favoriteTracksInteractor
                 .observeIsFavorite(track.trackId)
+                .catch { error ->
+                    if (error is CancellationException) throw error
+                    isFavoriteLoaded = false
+                    pendingFavoriteState = null
+                    renderState(currentProgress)
+                    _favoriteError.value = Event(Unit)
+                }
                 .collect { isFavorite ->
 
                     track.isFavorite = isFavorite

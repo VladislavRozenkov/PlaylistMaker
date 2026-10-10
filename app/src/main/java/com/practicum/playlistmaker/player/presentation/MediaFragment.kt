@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -82,6 +83,15 @@ class MediaFragment : Fragment() {
     }
 
     private fun observeViewModel() {
+        viewModel.favoriteError.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.favorite_operation_error,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
         viewModel.screenState.observe(viewLifecycleOwner) { state ->
             render(state)
         }
