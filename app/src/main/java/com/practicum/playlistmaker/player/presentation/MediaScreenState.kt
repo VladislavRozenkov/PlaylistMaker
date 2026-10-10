@@ -12,5 +12,6 @@ data class MediaScreenState(
     val progress: String,
     val isPlaying: Boolean,
     val isPlayButtonEnabled: Boolean,
-    val isFavorite: Boolean
+    val isFavorite: Boolean,
+    val isFavoriteButtonEnable: Boolean
 )

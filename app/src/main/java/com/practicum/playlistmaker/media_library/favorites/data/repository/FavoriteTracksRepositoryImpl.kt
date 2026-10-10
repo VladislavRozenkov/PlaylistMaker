@@ -35,4 +35,8 @@ class FavoriteTracksRepositoryImpl(
             }
 
     }
+
+    override fun observeIsFavorite(trackId: Long): Flow<Boolean> {
+        return database.trackDao().observeIsFavorite(trackId)
+    }
 }

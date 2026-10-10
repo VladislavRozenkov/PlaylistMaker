@@ -94,6 +94,7 @@ class MediaFragment : Fragment() {
         binding.durationValue.text = state.duration
         binding.genreValue.text = state.genre
         binding.countryValue.text = state.country
+        binding.like.isEnabled = state.isFavoriteButtonEnable
 
         binding.play.isEnabled = state.isPlayButtonEnabled
 

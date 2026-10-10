@@ -20,4 +20,8 @@ class FavoriteTracksInteractorImpl(
         return repository.getFavoriteTracks()
     }
 
+    override fun observeIsFavorite(trackId: Long): Flow<Boolean> {
+        return repository.observeIsFavorite(trackId)
+    }
+
 }

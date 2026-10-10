@@ -20,4 +20,9 @@ interface TrackDao {
 
     @Query("SELECT trackId FROM favorite_tracks")
     suspend fun gerFavoriteTrackIds(): List<Long>
+
+    @Query(
+        "SELECT EXISTS (SELECT 1 FROM favorite_tracks WHERE trackId = :trackId)"
+    )
+    fun observeIsFavorite(trackId: Long): Flow<Boolean>
 }
