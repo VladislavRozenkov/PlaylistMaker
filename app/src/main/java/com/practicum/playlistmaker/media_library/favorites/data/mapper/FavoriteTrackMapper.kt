@@ -21,7 +21,10 @@ class FavoriteTrackMapper {
         )
     }
 
-    fun mapEntityToTrack(entity: FavoriteTrackEntity): Track {
+    fun mapEntityToTrack(
+        entity: FavoriteTrackEntity,
+        isFavorite: Boolean
+    ): Track {
         return Track(trackId = entity.trackId,
             trackName = entity.trackName,
             artistName = entity.artistName,
@@ -32,7 +35,7 @@ class FavoriteTrackMapper {
             primaryGenreName = entity.primaryGenreName,
             country = entity.country,
             previewUrl = entity.previewUrl,
-            isFavorite = true
+            isFavorite = isFavorite
         )
     }
 

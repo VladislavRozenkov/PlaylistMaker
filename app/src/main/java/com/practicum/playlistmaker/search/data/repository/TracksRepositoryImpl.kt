@@ -10,24 +10,14 @@ import kotlinx.coroutines.flow.flow
 
 class TracksRepositoryImpl(
     private val api: ItunesApi,
-    private val mapper: TrackMapper,
-    private val database: AppDatabase
+    private val mapper: TrackMapper
 ) : TracksRepository {
 
     override fun searchTracks(query: String): Flow<List<Track>> = flow {
-
         val response = api.search(query)
 
-        val favoriteTrackIds = database
-            .trackDao()
-            .gerFavoriteTrackIds()
-            .toSet()
-
         val tracks = response.results.map { trackDto ->
-
-            mapper.map(trackDto).apply {
-                isFavorite = trackId in favoriteTrackIds
-            }
+            mapper.map(trackDto)
         }
 
         emit(tracks)

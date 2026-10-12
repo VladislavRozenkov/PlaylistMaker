@@ -2,6 +2,7 @@ package com.practicum.playlistmaker.di
 
 import androidx.room.Room
 import com.practicum.playlistmaker.media_library.favorites.data.db.AppDatabase
+import com.practicum.playlistmaker.media_library.favorites.data.db.TrackDao
 import com.practicum.playlistmaker.media_library.favorites.data.mapper.FavoriteTrackMapper
 import com.practicum.playlistmaker.media_library.favorites.data.repository.FavoriteTracksRepositoryImpl
 import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractor
@@ -53,6 +54,10 @@ val dataModule = module {
         ).build()
     }
 
+    single<TrackDao> {
+        get<AppDatabase>().trackDao()
+    }
+
     single {
         TrackMapper()
     }
@@ -79,14 +84,12 @@ val dataModule = module {
     single<TracksRepository> {
         TracksRepositoryImpl(
             get(),
-            get(),
             get()
         )
     }
 
     single<SearchHistoryRepository> {
         SearchHistoryRepositoryImpl(
-            get(),
             get(),
             get()
         )
