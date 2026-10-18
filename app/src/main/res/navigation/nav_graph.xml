@@ -15,6 +15,10 @@
             android:id="@+id/action_mediaLibraryFragment_to_mediaFragment"
             app:destination="@id/mediaFragment" />
 
+        <action
+            android:id="@+id/action_mediaLibraryFragment_to_createPlaylistFragment"
+            app:destination="@id/createPlaylistFragment" />
+
     </fragment>
 
     <fragment
@@ -42,5 +46,10 @@
             app:argType="com.practicum.playlistmaker.core.navigation.model.TrackParcelable" />
 
     </fragment>
+
+    <fragment
+        android:id="@+id/createPlaylistFragment"
+        android:name="com.practicum.playlistmaker.media_library.playlists.CreatePlaylistFragment"
+        android:label="@string/new_playlist" />
 
 </navigation>

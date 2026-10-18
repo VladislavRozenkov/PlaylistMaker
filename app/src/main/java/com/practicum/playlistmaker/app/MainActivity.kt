@@ -44,7 +44,8 @@ class MainActivity : AppCompatActivity() {
                 _, destination, _ ->
 
             binding.bottomNavigationView.isVisible =
-                destination.id != R.id.mediaFragment
+                destination.id != R.id.mediaFragment &&
+                        destination.id != R.id.createPlaylistFragment
         }
     }
 
