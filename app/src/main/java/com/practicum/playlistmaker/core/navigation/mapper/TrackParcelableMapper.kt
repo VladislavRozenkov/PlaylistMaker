@@ -16,7 +16,8 @@ object TrackParcelableMapper {
             track.releaseDate,
             track.primaryGenreName,
             track.country,
-            track.previewUrl
+            track.previewUrl,
+            track.isFavorite
         )
     }
 
@@ -31,7 +32,8 @@ object TrackParcelableMapper {
             trackParcelable.releaseDate,
             trackParcelable.primaryGenreName,
             trackParcelable.country,
-            trackParcelable.previewUrl
+            trackParcelable.previewUrl,
+            trackParcelable.isFavorite
         )
     }
 

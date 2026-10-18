@@ -1,6 +1,7 @@
 package com.practicum.playlistmaker.search.data.repository
 
 import com.practicum.playlistmaker.core.domain.model.Track
+import com.practicum.playlistmaker.media_library.favorites.data.db.AppDatabase
 import com.practicum.playlistmaker.search.domain.repository.TracksRepository
 import com.practicum.playlistmaker.search.data.mapper.TrackMapper
 import com.practicum.playlistmaker.search.data.network.ItunesApi
@@ -13,7 +14,6 @@ class TracksRepositoryImpl(
 ) : TracksRepository {
 
     override fun searchTracks(query: String): Flow<List<Track>> = flow {
-
         val response = api.search(query)
 
         val tracks = response.results.map { trackDto ->

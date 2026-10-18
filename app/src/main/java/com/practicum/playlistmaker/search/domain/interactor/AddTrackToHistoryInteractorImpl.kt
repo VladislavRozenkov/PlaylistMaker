@@ -7,7 +7,7 @@ class AddTrackToHistoryInteractorImpl(
     private val repository: SearchHistoryRepository
 ) : AddTrackToHistoryInteractor {
 
-    override fun execute(track: Track) {
+    override suspend fun execute(track: Track) {
         val history = repository.getHistory().toMutableList()
 
         history.removeAll { savedTrack ->
