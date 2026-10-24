@@ -50,4 +50,6 @@
     <string name="unsaved_playlist_data">Все несохраненные данные будут потеряны</string>
     <string name="cancel_playlist_creation">Отмена</string>
     <string name="finish_playlist_creation_button">Завершить</string>
+
+    <string name="selected_playlist_cover">Обложка плейлиста</string>
 </resources>

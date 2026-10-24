@@ -10,10 +10,22 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentCreatePlaylistBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isVisible
+import com.bumptech.glide.Glide
 
 class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
 
     private val viewModel: CreatePlaylistViewModel by viewModel()
+
+    private val pickCoverLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            viewModel.onCoverSelected(uri)
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,13 +47,37 @@ class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
             attemptExit(binding)
         }
+
+
+        binding.playlistCoverContainer.setOnClickListener {
+            pickCoverLauncher.launch(
+                PickVisualMediaRequest(
+                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                )
+            )
+        }
+
+        viewModel.coverUri.observe(viewLifecycleOwner) { uri ->
+            val hasCover = uri != null
+
+            binding.playlistCoverPlaceholder.isVisible = !hasCover
+            binding.playlistCoverImage.isVisible = hasCover
+
+            if (uri != null) {
+                Glide.with(this)
+                    .load(uri)
+                    .centerCrop()
+                    .into(binding.playlistCoverImage)
+            }
+        }
     }
 
     private fun attemptExit(binding: FragmentCreatePlaylistBinding) {
 
         val hasUnsavedData =
             !binding.playlistNameEditText.text.isNullOrEmpty() ||
-                    !binding.playlistDescriptionEditText.text.isNullOrEmpty()
+                    !binding.playlistDescriptionEditText.text.isNullOrEmpty() ||
+                    viewModel.coverUri.value != null
 
         if (!hasUnsavedData) {
             findNavController().navigateUp()
