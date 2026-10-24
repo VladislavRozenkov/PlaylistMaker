@@ -41,4 +41,8 @@
     <string name="favorite_operation_error">Не удалось обновить избранное. Попробуйте открыть плеер снова.</string>
 
     <string name="add_playlist_cover">Добавить обложку плейлиста</string>
+
+    <string name="playlist_name">Название*</string>
+    <string name="playlist_description">Описание</string>
+    <string name="create_playlist">Создать</string>
 </resources>
