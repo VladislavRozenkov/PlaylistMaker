@@ -8,6 +8,8 @@ import com.practicum.playlistmaker.media_library.favorites.data.repository.Favor
 import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractor
 import com.practicum.playlistmaker.media_library.favorites.domain.interactor.FavoriteTracksInteractorImpl
 import com.practicum.playlistmaker.media_library.favorites.domain.repository.FavoriteTracksRepository
+import com.practicum.playlistmaker.media_library.playlists.data.db.MIGRATION_1_2
+import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistDao
 import com.practicum.playlistmaker.search.data.mapper.TrackMapper
 import com.practicum.playlistmaker.search.data.network.ItunesApi
 import com.practicum.playlistmaker.player.data.repository.AudioPlayerRepositoryImpl
@@ -51,7 +53,13 @@ val dataModule = module {
             androidContext(),
             AppDatabase::class.java,
             "playlist_maker.db"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
+    }
+
+    single<PlaylistDao> {
+        get<AppDatabase>().playlistDao()
     }
 
     single<TrackDao> {
