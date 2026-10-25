@@ -10,6 +10,9 @@ import com.practicum.playlistmaker.media_library.favorites.domain.interactor.Fav
 import com.practicum.playlistmaker.media_library.favorites.domain.repository.FavoriteTracksRepository
 import com.practicum.playlistmaker.media_library.playlists.data.db.MIGRATION_1_2
 import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistDao
+import com.practicum.playlistmaker.media_library.playlists.data.mapper.PlaylistMapper
+import com.practicum.playlistmaker.media_library.playlists.data.repository.PlaylistRepositoryImpl
+import com.practicum.playlistmaker.media_library.playlists.domain.repository.PlaylistRepository
 import com.practicum.playlistmaker.search.data.mapper.TrackMapper
 import com.practicum.playlistmaker.search.data.network.ItunesApi
 import com.practicum.playlistmaker.player.data.repository.AudioPlayerRepositoryImpl
@@ -30,6 +33,18 @@ import retrofit2.converter.gson.GsonConverterFactory
 private const val BASE_URL = "https://itunes.apple.com/"
 
 val dataModule = module {
+
+
+    single {
+        PlaylistMapper()
+    }
+
+    single<PlaylistRepository> {
+        PlaylistRepositoryImpl(
+            get(),
+            get()
+        )
+    }
 
     factory<FavoriteTracksInteractor> {
         FavoriteTracksInteractorImpl(
