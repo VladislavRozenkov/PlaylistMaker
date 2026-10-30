@@ -52,4 +52,9 @@
     <string name="finish_playlist_creation_button">Завершить</string>
 
     <string name="selected_playlist_cover">Обложка плейлиста</string>
+
+
+    <string name="playlist_created">Плейлист %1$s создан</string>
+    <string name="playlist_creation_error">Не удалось создать плейлист. Попробуйте снова.</string>
+
 </resources>

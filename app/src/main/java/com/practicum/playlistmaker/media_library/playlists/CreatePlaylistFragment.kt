@@ -14,6 +14,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
+import android.widget.Toast
 
 class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
 
@@ -68,6 +69,37 @@ class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
                     .load(uri)
                     .centerCrop()
                     .into(binding.playlistCoverImage)
+            }
+        }
+
+        binding.createPlaylistButton.setOnClickListener {
+            viewModel.createPlaylist(
+                name = binding.playlistNameEditText.text.toString(),
+                description = binding.playlistDescriptionEditText.text.toString()
+            )
+        }
+
+        viewModel.saveResult.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { result ->
+                when (result) {
+                    is CreatePlaylistSaveResult.Success -> {
+                        Toast.makeText(
+                            requireContext(),
+                            getString(R.string.playlist_created, result.name),
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        findNavController().navigateUp()
+                    }
+
+                    CreatePlaylistSaveResult.Error -> {
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.playlist_creation_error,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
             }
         }
     }

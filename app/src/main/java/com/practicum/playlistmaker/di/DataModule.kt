@@ -12,6 +12,7 @@ import com.practicum.playlistmaker.media_library.playlists.data.db.MIGRATION_1_2
 import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistDao
 import com.practicum.playlistmaker.media_library.playlists.data.mapper.PlaylistMapper
 import com.practicum.playlistmaker.media_library.playlists.data.repository.PlaylistRepositoryImpl
+import com.practicum.playlistmaker.media_library.playlists.data.storage.PlaylistCoverStorage
 import com.practicum.playlistmaker.media_library.playlists.domain.repository.PlaylistRepository
 import com.practicum.playlistmaker.search.data.mapper.TrackMapper
 import com.practicum.playlistmaker.search.data.network.ItunesApi
@@ -34,6 +35,10 @@ private const val BASE_URL = "https://itunes.apple.com/"
 
 val dataModule = module {
 
+    single {
+        PlaylistCoverStorage(androidContext())
+    }
+
 
     single {
         PlaylistMapper()
@@ -41,6 +46,7 @@ val dataModule = module {
 
     single<PlaylistRepository> {
         PlaylistRepositoryImpl(
+            get(),
             get(),
             get()
         )

@@ -5,7 +5,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface PlaylistInteractor {
 
-    suspend fun createPlaylist(playlist: Playlist): Long
+    suspend fun createPlaylist(
+        playlist: Playlist,
+        coverUri: String?
+    ): Long
 
     suspend fun updatePlaylist(playlist: Playlist)
 

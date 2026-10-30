@@ -13,7 +13,7 @@ import org.koin.dsl.module
 val viewModelModule = module {
 
     viewModel {
-        CreatePlaylistViewModel()
+        CreatePlaylistViewModel(get())
     }
 
     viewModel {

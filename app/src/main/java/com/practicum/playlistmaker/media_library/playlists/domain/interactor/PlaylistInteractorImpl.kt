@@ -8,8 +8,14 @@ class PlaylistInteractorImpl(
     private val repository: PlaylistRepository
 ) : PlaylistInteractor {
 
-    override suspend fun createPlaylist(playlist: Playlist): Long {
-        return repository.createPlaylist(playlist)
+    override suspend fun createPlaylist(
+        playlist: Playlist,
+        coverUri: String?
+    ): Long {
+        return repository.createPlaylist(
+            playlist,
+            coverUri
+        )
     }
 
     override suspend fun updatePlaylist(playlist: Playlist) {
