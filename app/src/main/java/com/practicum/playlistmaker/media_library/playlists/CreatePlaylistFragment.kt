@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import com.bumptech.glide.Glide
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import com.google.android.material.snackbar.Snackbar
 
 class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
 
@@ -83,13 +85,27 @@ class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
             event.getContentIfNotHandled()?.let { result ->
                 when (result) {
                     is CreatePlaylistSaveResult.Success -> {
-                        Toast.makeText(
-                            requireContext(),
-                            getString(R.string.playlist_created, result.name),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val activity = requireActivity()
+
+                        val message = getString(
+                            R.string.playlist_created,
+                            result.name
+                        )
 
                         findNavController().navigateUp()
+
+                        Snackbar.make(
+                            activity.findViewById(android.R.id.content),
+                            message,
+                            Snackbar.LENGTH_LONG
+                        )
+                            .setBackgroundTint(
+                                ContextCompat.getColor(activity, R.color.black)
+                            )
+                            .setTextColor(
+                                ContextCompat.getColor(activity, R.color.white)
+                            )
+                            .show()
                     }
 
                     CreatePlaylistSaveResult.Error -> {
