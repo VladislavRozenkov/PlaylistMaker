@@ -68,4 +68,30 @@
         <item name="android:textAllCaps">false</item>
     </style>
 
+    <style name="PlaylistInputStyle"
+        parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+        <item name="boxStrokeColor">@color/playlist_input_stroke</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+
+        <item name="boxCornerRadiusTopStart">4dp</item>
+        <item name="boxCornerRadiusTopEnd">4dp</item>
+        <item name="boxCornerRadiusBottomStart">4dp</item>
+        <item name="boxCornerRadiusBottomEnd">4dp</item>
+
+        <item name="android:textColorHint">?attr/colorControlNormal</item>
+        <item name="hintTextColor">@color/blue</item>
+        <item name="hintTextAppearance">@style/PlaylistHintStyle</item>
+
+    </style>
+
+    <style name="PlaylistHintStyle"
+        parent="TextAppearance.MaterialComponents.Caption">
+
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">12sp</item>
+
+    </style>
+
 </resources>
