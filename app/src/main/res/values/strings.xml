@@ -57,4 +57,7 @@
     <string name="playlist_created">Плейлист %1$s создан</string>
     <string name="playlist_creation_error">Не удалось создать плейлист. Попробуйте снова.</string>
 
+    <string name="playlist_tracks_one">%1$d трек</string>
+    <string name="playlist_tracks_few">%1$d трека</string>
+    <string name="playlist_tracks_many">%1$d треков</string>
 </resources>
