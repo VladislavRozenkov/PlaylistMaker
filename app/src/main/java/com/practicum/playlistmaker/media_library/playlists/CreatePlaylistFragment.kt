@@ -17,6 +17,13 @@ import com.bumptech.glide.Glide
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
+import android.widget.FrameLayout
+import android.view.Gravity
+import android.view.ViewGroup
+import android.widget.TextView
+import kotlin.math.roundToInt
+import android.util.TypedValue
+import androidx.core.content.res.ResourcesCompat
 
 class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
 
@@ -94,18 +101,58 @@ class CreatePlaylistFragment : Fragment(R.layout.fragment_create_playlist) {
 
                         findNavController().navigateUp()
 
-                        Snackbar.make(
+                        val snackbar = Snackbar.make(
                             activity.findViewById(android.R.id.content),
                             message,
                             Snackbar.LENGTH_LONG
                         )
                             .setBackgroundTint(
-                                ContextCompat.getColor(activity, R.color.black)
+                                ContextCompat.getColor(
+                                    activity,
+                                    R.color.snackbar_background
+                                )
                             )
                             .setTextColor(
-                                ContextCompat.getColor(activity, R.color.white)
+                                ContextCompat.getColor(
+                                    activity,
+                                    R.color.snackbar_text
+                                )
                             )
-                            .show()
+
+                        val density = resources.displayMetrics.density
+
+                        val height = (48 * density).roundToInt()
+                        val margin = (16 * density).roundToInt()
+
+                        snackbar.view.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            height,
+                            Gravity.BOTTOM
+                        ).apply {
+                            setMargins(margin, 0, margin, margin)
+                        }
+
+                        val textView = snackbar.view.findViewById<TextView>(
+                            com.google.android.material.R.id.snackbar_text
+                        )
+
+                        textView.apply {
+                            typeface = ResourcesCompat.getFont(
+                                activity,
+                                R.font.ys_display_regular
+                            )
+
+                            setTextSize(
+                                TypedValue.COMPLEX_UNIT_SP,
+                                14f
+                            )
+
+                            letterSpacing = 0f
+                            gravity = Gravity.CENTER
+                            textAlignment = View.TEXT_ALIGNMENT_CENTER
+                        }
+
+                        snackbar.show()
                     }
 
                     CreatePlaylistSaveResult.Error -> {
