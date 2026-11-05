@@ -36,6 +36,7 @@ val viewModelModule = module {
         MediaViewModel(
             track,
             get(),
+            get(),
             get()
         )
     }

@@ -15,11 +15,14 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.flow.catch
+import com.practicum.playlistmaker.media_library.playlists.domain.interactor.PlaylistInteractor
+import com.practicum.playlistmaker.media_library.playlists.domain.model.Playlist
 
 class MediaViewModel(
     private val track: Track,
     private val audioPlayerInteractor: AudioPlayerInteractor,
-    private val favoriteTracksInteractor: FavoriteTracksInteractor
+    private val favoriteTracksInteractor: FavoriteTracksInteractor,
+    private val playlistInteractor: PlaylistInteractor
 ) : ViewModel() {
 
     private var timerJob: Job? = null
@@ -35,8 +38,13 @@ class MediaViewModel(
     private val _favoriteError = MutableLiveData<Event<Unit>>()
     val favoriteError: LiveData<Event<Unit>> = _favoriteError
 
+    private val _playlists = MutableLiveData<List<Playlist>>(emptyList())
+
+    val playlists: LiveData<List<Playlist>> = _playlists
+
     init {
         observeIsFavoriteState()
+        observePlaylists()
     }
 
     private fun startTimer() {
@@ -85,6 +93,14 @@ class MediaViewModel(
                 .getCurrentPosition()
                 .toLong()
             renderState(currentProgress)
+        }
+    }
+
+    private fun observePlaylists() {
+        viewModelScope.launch {
+            playlistInteractor.getPlaylists().collect { list ->
+                _playlists.value = list
+            }
         }
     }
 
