@@ -60,4 +60,8 @@
     <string name="playlist_tracks_one">%1$d трек</string>
     <string name="playlist_tracks_few">%1$d трека</string>
     <string name="playlist_tracks_many">%1$d треков</string>
+
+
+    <string name="add_to_playlist_title">Добавить в плейлист</string>
+
 </resources>
