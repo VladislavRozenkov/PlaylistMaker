@@ -15,11 +15,14 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.flow.catch
+import com.practicum.playlistmaker.media_library.playlists.domain.interactor.PlaylistInteractor
+import com.practicum.playlistmaker.media_library.playlists.domain.model.Playlist
 
 class MediaViewModel(
     private val track: Track,
     private val audioPlayerInteractor: AudioPlayerInteractor,
-    private val favoriteTracksInteractor: FavoriteTracksInteractor
+    private val favoriteTracksInteractor: FavoriteTracksInteractor,
+    private val playlistInteractor: PlaylistInteractor
 ) : ViewModel() {
 
     private var timerJob: Job? = null
@@ -35,8 +38,21 @@ class MediaViewModel(
     private val _favoriteError = MutableLiveData<Event<Unit>>()
     val favoriteError: LiveData<Event<Unit>> = _favoriteError
 
+    private val _playlists = MutableLiveData<List<Playlist>>(emptyList())
+
+    val playlists: LiveData<List<Playlist>> = _playlists
+
+    private val _playlistAddResult =
+        MutableLiveData<Event<PlaylistAddResult>>()
+
+    val playlistAddResult: LiveData<Event<PlaylistAddResult>> =
+        _playlistAddResult
+
+    private var isAddingTrack = false
+
     init {
         observeIsFavoriteState()
+        observePlaylists()
     }
 
     private fun startTimer() {
@@ -85,6 +101,58 @@ class MediaViewModel(
                 .getCurrentPosition()
                 .toLong()
             renderState(currentProgress)
+        }
+    }
+
+
+    fun onPlaylistClicked(playlist: Playlist) {
+
+        if (isAddingTrack) return
+
+        val currentPlaylist = _playlists.value
+            ?.firstOrNull { it.id == playlist.id }
+            ?: playlist
+
+        if (track.trackId in currentPlaylist.trackIds) {
+            _playlistAddResult.value = Event(
+                PlaylistAddResult.AlreadyExists(currentPlaylist.name)
+            )
+            return
+        }
+
+        isAddingTrack = true
+
+        viewModelScope.launch {
+            try {
+                playlistInteractor.addTrackToPlaylist(
+                    track,
+                    currentPlaylist
+                )
+
+                _playlistAddResult.value = Event(
+                    PlaylistAddResult.Added(currentPlaylist.name)
+                )
+
+            } catch (error: CancellationException) {
+                throw error
+
+            } catch (error: Exception) {
+                _playlistAddResult.value = Event(
+                    PlaylistAddResult.Error
+                )
+
+            } finally {
+                isAddingTrack = false
+            }
+        }
+    }
+
+
+    private fun observePlaylists() {
+        viewModelScope.launch {
+            playlistInteractor.getPlaylists().collect { list ->
+                _playlists.value = list
+            }
         }
     }
 

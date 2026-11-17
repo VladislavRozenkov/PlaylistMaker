@@ -20,6 +20,9 @@ import com.practicum.playlistmaker.core.navigation.mapper.TrackParcelableMapper
 import com.practicum.playlistmaker.core.navigation.model.TrackParcelable
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 
 class MediaFragment : Fragment() {
 
@@ -62,10 +65,12 @@ class MediaFragment : Fragment() {
     ) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupBottomSheet()
         setupListeners()
         observeViewModel()
 
         viewModel.onScreenOpened()
+
     }
 
     private fun setupListeners() {
@@ -95,6 +100,54 @@ class MediaFragment : Fragment() {
         viewModel.screenState.observe(viewLifecycleOwner) { state ->
             render(state)
         }
+
+
+        viewModel.playlistAddResult.observe(viewLifecycleOwner) { event ->
+
+            event.getContentIfNotHandled()?.let { result ->
+
+                when (result) {
+
+                    is PlaylistAddResult.Added -> {
+
+                        BottomSheetBehavior.from(
+                            binding.playlistsBottomSheet
+                        ).state = BottomSheetBehavior.STATE_HIDDEN
+
+                        Toast.makeText(
+                            requireContext(),
+                            getString(
+                                R.string.track_added_to_playlist,
+                                result.playlistName
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    is PlaylistAddResult.AlreadyExists -> {
+
+                        Toast.makeText(
+                            requireContext(),
+                            getString(
+                                R.string.track_already_in_playlist,
+                                result.playlistName
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    PlaylistAddResult.Error -> {
+
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.track_playlist_add_error,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+
     }
 
     private fun render(state: MediaScreenState) {
@@ -193,6 +246,74 @@ class MediaFragment : Fragment() {
         }
     }
 
+
+    private fun setupBottomSheet() {
+
+        val playlistAdapter = BottomSheetPlaylistAdapter()
+
+        playlistAdapter.onPlaylistClick = { playlist ->
+            viewModel.onPlaylistClicked(playlist)
+        }
+
+        binding.playlistsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = playlistAdapter
+        }
+
+        viewModel.playlists.observe(viewLifecycleOwner) { playlists ->
+            playlistAdapter.updatePlaylists(playlists)
+        }
+
+        val bottomSheetBehavior = BottomSheetBehavior.from(
+            binding.playlistsBottomSheet
+        ).apply {
+            isHideable = true
+            state = BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        bottomSheetBehavior.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+
+                override fun onStateChanged(
+                    bottomSheet: View,
+                    newState: Int
+                ) {
+                    binding.overlay.isVisible =
+                        newState != BottomSheetBehavior.STATE_HIDDEN
+                }
+
+                override fun onSlide(
+                    bottomSheet: View,
+                    slideOffset: Float
+                ) {
+
+                }
+            }
+        )
+
+        binding.added.setOnClickListener {
+            binding.overlay.isVisible = true
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_COLLAPSED
+        }
+
+        binding.overlay.setOnClickListener {
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        binding.newPlaylistButton.setOnClickListener {
+
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+
+            findNavController().navigate(
+                R.id.action_mediaFragment_to_createPlaylistFragment
+            )
+        }
+    }
+
+
     override fun onPause() {
         super.onPause()
 
@@ -201,6 +322,8 @@ class MediaFragment : Fragment() {
 
     override fun onDestroyView() {
         currentArtworkUrl = null
+
+        binding.playlistsRecyclerView.adapter = null
 
         _binding = null
 
