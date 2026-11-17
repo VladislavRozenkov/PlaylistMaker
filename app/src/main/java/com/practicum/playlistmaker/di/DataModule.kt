@@ -30,9 +30,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.practicum.playlistmaker.media_library.playlists.data.db.MIGRATION_2_3
 import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistTrackDao
-
+import com.practicum.playlistmaker.media_library.playlists.data.db.MIGRATION_2_3
 private const val BASE_URL = "https://itunes.apple.com/"
 
 val dataModule = module {
@@ -87,6 +86,10 @@ val dataModule = module {
 
     single<PlaylistDao> {
         get<AppDatabase>().playlistDao()
+    }
+
+    single<PlaylistTrackDao> {
+        get<AppDatabase>().playlistTrackDao()
     }
 
     single<TrackDao> {
