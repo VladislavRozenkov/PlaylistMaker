@@ -1,5 +1,6 @@
 package com.practicum.playlistmaker.media_library.playlists.domain.interactor
 
+import com.practicum.playlistmaker.core.domain.model.Track
 import com.practicum.playlistmaker.media_library.playlists.domain.model.Playlist
 import com.practicum.playlistmaker.media_library.playlists.domain.repository.PlaylistRepository
 import kotlinx.coroutines.flow.Flow
@@ -7,6 +8,13 @@ import kotlinx.coroutines.flow.Flow
 class PlaylistInteractorImpl(
     private val repository: PlaylistRepository
 ) : PlaylistInteractor {
+
+    override suspend fun addTrackToPlaylist(
+        track: Track,
+        playlist: Playlist
+    ) {
+        repository.addTrackToPlaylist(track, playlist)
+    }
 
     override suspend fun createPlaylist(
         playlist: Playlist,

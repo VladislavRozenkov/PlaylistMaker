@@ -10,12 +10,50 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.practicum.playlistmaker.core.domain.model.Track
+import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistTrackDao
+import com.practicum.playlistmaker.media_library.playlists.data.db.PlaylistTrackEntity
 
 class PlaylistRepositoryImpl(
     private val dao: PlaylistDao,
     private val mapper: PlaylistMapper,
-    private val coverStorage: PlaylistCoverStorage
+    private val coverStorage: PlaylistCoverStorage,
+    private val playlistTrackDao: PlaylistTrackDao
 ) : PlaylistRepository {
+
+    override suspend fun addTrackToPlaylist(
+        track: Track,
+        playlist: Playlist
+    ) = withContext(Dispatchers.IO) {
+
+        if (track.trackId in playlist.trackIds) {
+            return@withContext
+        }
+
+        val updatedPlaylist = playlist.copy(
+            trackIds = playlist.trackIds + track.trackId
+        )
+
+        val trackEntity = PlaylistTrackEntity(
+            trackId = track.trackId,
+            trackName = track.trackName,
+            artistName = track.artistName,
+            trackTimeMillis = track.trackTimeMillis,
+            artworkUrl100 = track.artworkUrl100,
+            collectionName = track.collectionName,
+            releaseDate = track.releaseDate,
+            primaryGenreName = track.primaryGenreName,
+            country = track.country,
+            previewUrl = track.previewUrl,
+            addedAt = System.currentTimeMillis()
+        )
+
+        playlistTrackDao.insertTrack(trackEntity)
+
+        dao.updatePlaylist(
+            mapper.toEntity(updatedPlaylist)
+        )
+    }
 
     override suspend fun createPlaylist(
         playlist: Playlist,

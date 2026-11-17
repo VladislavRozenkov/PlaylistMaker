@@ -42,6 +42,14 @@ class MediaViewModel(
 
     val playlists: LiveData<List<Playlist>> = _playlists
 
+    private val _playlistAddResult =
+        MutableLiveData<Event<PlaylistAddResult>>()
+
+    val playlistAddResult: LiveData<Event<PlaylistAddResult>> =
+        _playlistAddResult
+
+    private var isAddingTrack = false
+
     init {
         observeIsFavoriteState()
         observePlaylists()
@@ -95,6 +103,50 @@ class MediaViewModel(
             renderState(currentProgress)
         }
     }
+
+
+    fun onPlaylistClicked(playlist: Playlist) {
+
+        if (isAddingTrack) return
+
+        val currentPlaylist = _playlists.value
+            ?.firstOrNull { it.id == playlist.id }
+            ?: playlist
+
+        if (track.trackId in currentPlaylist.trackIds) {
+            _playlistAddResult.value = Event(
+                PlaylistAddResult.AlreadyExists(currentPlaylist.name)
+            )
+            return
+        }
+
+        isAddingTrack = true
+
+        viewModelScope.launch {
+            try {
+                playlistInteractor.addTrackToPlaylist(
+                    track,
+                    currentPlaylist
+                )
+
+                _playlistAddResult.value = Event(
+                    PlaylistAddResult.Added(currentPlaylist.name)
+                )
+
+            } catch (error: CancellationException) {
+                throw error
+
+            } catch (error: Exception) {
+                _playlistAddResult.value = Event(
+                    PlaylistAddResult.Error
+                )
+
+            } finally {
+                isAddingTrack = false
+            }
+        }
+    }
+
 
     private fun observePlaylists() {
         viewModelScope.launch {

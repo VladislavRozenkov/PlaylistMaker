@@ -21,3 +21,26 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
     }
 }
+
+val MIGRATION_2_3 = object : Migration(2, 3) {
+
+    override fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            CREATE TABLE IF NOT EXISTS `playlist_tracks` (
+                `trackId` INTEGER NOT NULL PRIMARY KEY,
+                `trackName` TEXT NOT NULL,
+                `artistName` TEXT NOT NULL,
+                `trackTimeMillis` INTEGER NOT NULL,
+                `artworkUrl100` TEXT NOT NULL,
+                `collectionName` TEXT,
+                `releaseDate` TEXT,
+                `primaryGenreName` TEXT,
+                `country` TEXT,
+                `previewUrl` TEXT,
+                `addedAt` INTEGER NOT NULL
+            )
+            """.trimIndent()
+        )
+    }
+}

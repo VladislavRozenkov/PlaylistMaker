@@ -45,6 +45,10 @@
             android:name="track"
             app:argType="com.practicum.playlistmaker.core.navigation.model.TrackParcelable" />
 
+        <action
+            android:id="@+id/action_mediaFragment_to_createPlaylistFragment"
+            app:destination="@id/createPlaylistFragment" />
+
     </fragment>
 
     <fragment

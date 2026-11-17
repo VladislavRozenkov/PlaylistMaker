@@ -100,6 +100,54 @@ class MediaFragment : Fragment() {
         viewModel.screenState.observe(viewLifecycleOwner) { state ->
             render(state)
         }
+
+
+        viewModel.playlistAddResult.observe(viewLifecycleOwner) { event ->
+
+            event.getContentIfNotHandled()?.let { result ->
+
+                when (result) {
+
+                    is PlaylistAddResult.Added -> {
+
+                        BottomSheetBehavior.from(
+                            binding.playlistsBottomSheet
+                        ).state = BottomSheetBehavior.STATE_HIDDEN
+
+                        Toast.makeText(
+                            requireContext(),
+                            getString(
+                                R.string.track_added_to_playlist,
+                                result.playlistName
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    is PlaylistAddResult.AlreadyExists -> {
+
+                        Toast.makeText(
+                            requireContext(),
+                            getString(
+                                R.string.track_already_in_playlist,
+                                result.playlistName
+                            ),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    PlaylistAddResult.Error -> {
+
+                        Toast.makeText(
+                            requireContext(),
+                            R.string.track_playlist_add_error,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+
     }
 
     private fun render(state: MediaScreenState) {
@@ -203,6 +251,10 @@ class MediaFragment : Fragment() {
 
         val playlistAdapter = BottomSheetPlaylistAdapter()
 
+        playlistAdapter.onPlaylistClick = { playlist ->
+            viewModel.onPlaylistClicked(playlist)
+        }
+
         binding.playlistsRecyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = playlistAdapter
@@ -234,7 +286,7 @@ class MediaFragment : Fragment() {
                     bottomSheet: View,
                     slideOffset: Float
                 ) {
-                    // Пока оставляем пустым
+
                 }
             }
         )
@@ -248,6 +300,16 @@ class MediaFragment : Fragment() {
         binding.overlay.setOnClickListener {
             bottomSheetBehavior.state =
                 BottomSheetBehavior.STATE_HIDDEN
+        }
+
+        binding.newPlaylistButton.setOnClickListener {
+
+            bottomSheetBehavior.state =
+                BottomSheetBehavior.STATE_HIDDEN
+
+            findNavController().navigate(
+                R.id.action_mediaFragment_to_createPlaylistFragment
+            )
         }
     }
 
